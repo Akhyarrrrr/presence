@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Search, Trash2, UserPlus } from 'lucide-react'
+import { Building2, Search, ShieldCheck, Trash2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Member } from '@/types'
+import { EmptyState, Surface } from '@/components/ui/presence-ui'
 
 export default function MembersClient({ initialMembers }: Readonly<{ initialMembers: Member[] }>) {
   const [members, setMembers] = useState(initialMembers)
@@ -34,36 +35,41 @@ export default function MembersClient({ initialMembers }: Readonly<{ initialMemb
 
   return (
     <div>
-      <div className="relative mb-6">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+      <div className="relative mb-5">
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name or ID..."
-          className="w-full rounded-xl border border-gray-800 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-zinc-200 bg-white py-3 pl-10 pr-4 text-sm font-medium text-zinc-950 placeholder-zinc-400 shadow-[0_12px_40px_rgba(15,23,42,0.04)] transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-gray-800 bg-gray-900 py-16 text-center">
-          <p className="mb-3 text-gray-500">{search ? 'No members found' : 'No members registered yet'}</p>
-          <Link
-            href="/members/new"
-            className="inline-flex items-center gap-2 text-sm text-indigo-400 transition hover:text-indigo-300"
-          >
-            <UserPlus size={14} />
-            Register first member
-          </Link>
-        </div>
+        <EmptyState
+          icon={UserPlus}
+          title={search ? 'No matching members' : 'No members registered yet'}
+          description={
+            search
+              ? 'Try a different name, employee ID, or clear the search input.'
+              : 'Create the first identity profile before opening kiosk mode.'
+          }
+          action={
+            <Link
+              href="/members/new"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-800"
+            >
+              <UserPlus size={14} />
+              Register first member
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((member) => (
-            <div
-              key={member.id}
-              className="group rounded-2xl border border-gray-800 bg-gray-900 p-4 transition hover:border-gray-700"
-            >
+            <Surface key={member.id} className="group p-4" hover>
               <div className="mb-3 flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/20 text-lg font-bold text-indigo-400">
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-lg font-bold text-cyan-800 ring-1 ring-cyan-100">
                   {member.photo_url ? (
                     <img src={member.photo_url} alt={member.name} className="h-full w-full object-cover" />
                   ) : (
@@ -74,24 +80,25 @@ export default function MembersClient({ initialMembers }: Readonly<{ initialMemb
                   type="button"
                   onClick={() => handleDelete(member.id, member.name)}
                   aria-label={`Remove ${member.name}`}
-                  className="cursor-pointer rounded-lg p-1.5 text-gray-600 opacity-100 transition hover:bg-red-400/10 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
+                  className="cursor-pointer rounded-md p-1.5 text-zinc-400 opacity-100 transition hover:bg-rose-50 hover:text-rose-700 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <Trash2 size={14} />
                 </button>
               </div>
 
-              <p className="font-medium text-white">{member.name}</p>
-              <p className="text-sm text-gray-500">{member.employee_id}</p>
+              <p className="font-semibold text-zinc-950">{member.name}</p>
+              <p className="text-sm text-zinc-500">{member.employee_id}</p>
               {member.departments?.name && (
-                <span className="mt-2 inline-block rounded-md bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-400">
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-700">
+                  <Building2 size={12} />
                   {member.departments.name}
                 </span>
               )}
-              <div className="mt-3 flex items-center gap-1.5 border-t border-gray-800 pt-3">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-xs text-gray-500">Face registered</span>
+              <div className="mt-4 flex items-center gap-2 border-t border-zinc-200 pt-3">
+                <ShieldCheck size={14} className="text-emerald-600" />
+                <span className="text-xs font-semibold text-zinc-500">Face registered</span>
               </div>
-            </div>
+            </Surface>
           ))}
         </div>
       )}

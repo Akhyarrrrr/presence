@@ -9,12 +9,15 @@ export default function DateFilter({
   const router = useRouter()
 
   return (
-    <input
-      type="date"
-      defaultValue={selectedDate}
-      max={maxDate}
-      onChange={(e) => router.push(`/logs?date=${e.target.value}`)}
-      className="rounded-lg border border-gray-800 bg-gray-900 px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-    />
+    <label className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 shadow-[0_12px_40px_rgba(15,23,42,0.04)]">
+      <span className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Date</span>
+      <input
+        type="date"
+        defaultValue={selectedDate}
+        max={maxDate}
+        onChange={(e) => router.push(`/logs?date=${e.target.value}`)}
+        className="cursor-pointer bg-transparent text-sm font-semibold text-zinc-950 focus:outline-none"
+      />
+    </label>
   )
 }

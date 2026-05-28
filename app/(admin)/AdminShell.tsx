@@ -11,10 +11,13 @@ import {
   Menu,
   ScanFace,
   Users,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
+import { BrandMark, StatusBadge } from '@/components/ui/presence-ui'
+import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -44,25 +47,37 @@ export default function AdminShell({
 
   const sidebar = (
     <div className="flex h-full flex-col">
-      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-gray-800 px-4">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-500/30 bg-indigo-500/20">
-          <ScanFace size={16} className="text-indigo-400" />
-        </div>
-        <span className="font-semibold text-white">Presence</span>
-        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-600">admin</span>
+      <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-5 py-5">
+        <BrandMark />
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close navigation"
+          className="grid h-8 w-8 cursor-pointer place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 md:hidden"
+        >
+          <X size={16} />
+        </button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-2 py-4">
+      <div className="px-4 pt-4">
+        <div className="rounded-lg border border-cyan-100 bg-cyan-50/70 px-3 py-3">
+          <StatusBadge tone="emerald">Secure session</StatusBadge>
+          <p className="mt-3 truncate text-xs font-medium text-zinc-600">{user.email}</p>
+        </div>
+      </div>
+
+      <nav className="flex-1 space-y-1 px-3 py-5" aria-label="Admin navigation">
         {navItems.map(({ href, label, icon: Icon, exact }) => (
           <Link
             key={href}
             href={href}
             onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition duration-200',
               isActive(href, exact)
-                ? 'bg-indigo-500/10 font-medium text-indigo-400'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            }`}
+                ? 'bg-zinc-950 text-white shadow-[0_16px_40px_rgba(15,23,42,0.16)]'
+                : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950'
+            )}
           >
             <Icon size={16} />
             {label}
@@ -72,19 +87,18 @@ export default function AdminShell({
         <Link
           href="/attendance"
           target="_blank"
-          className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white"
+          className="mt-3 flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-2.5 text-sm font-semibold text-zinc-700 transition duration-200 hover:border-cyan-200 hover:text-cyan-800"
         >
           <ExternalLink size={16} />
-          Open Scanner
+          Kiosk Scanner
         </Link>
       </nav>
 
-      <div className="border-t border-gray-800 p-4">
-        <p className="mb-2 truncate text-xs text-gray-600">{user.email}</p>
+      <div className="border-t border-zinc-200 p-4">
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-400 transition hover:bg-red-400/5 hover:text-red-400"
+          className="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-zinc-600 transition duration-200 hover:bg-rose-50 hover:text-rose-700"
         >
           <LogOut size={14} />
           Sign out
@@ -94,8 +108,8 @@ export default function AdminShell({
   )
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
-      <aside className="fixed hidden h-full w-56 shrink-0 flex-col border-r border-gray-800 bg-gray-900/30 md:flex">
+    <div className="flex min-h-screen">
+      <aside className="fixed hidden h-full w-72 shrink-0 flex-col border-r border-zinc-200 bg-white/88 backdrop-blur-xl md:flex">
         {sidebar}
       </aside>
 
@@ -104,28 +118,30 @@ export default function AdminShell({
           <button
             type="button"
             aria-label="Close navigation"
-            className="fixed inset-0 cursor-pointer bg-black/60"
+            className="fixed inset-0 cursor-pointer bg-zinc-950/35 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative w-56 border-r border-gray-800 bg-gray-900">{sidebar}</aside>
+          <aside className="relative w-72 border-r border-zinc-200 bg-white">{sidebar}</aside>
         </div>
       )}
 
-      <div className="flex-1 md:ml-56">
-        <div className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-gray-800 bg-gray-900/50 px-4 md:hidden">
+      <div className="flex-1 md:ml-72">
+        <div className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/88 px-4 backdrop-blur-xl md:hidden">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation"
-            className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-800 hover:text-white"
+            className="cursor-pointer rounded-md p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
           >
             <Menu size={18} />
           </button>
-          <ScanFace size={18} className="text-indigo-400" />
-          <span className="text-sm font-semibold text-white">Presence Admin</span>
+          <ScanFace size={18} className="text-cyan-700" />
+          <span className="text-sm font-bold text-zinc-950">Presence Command</span>
         </div>
 
-        <main className="mx-auto max-w-5xl p-4 md:p-8">{children}</main>
+        <main id="main-content" className="mx-auto max-w-7xl p-4 md:p-8 lg:p-10">
+          {children}
+        </main>
       </div>
     </div>
   )

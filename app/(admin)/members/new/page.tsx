@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { PageHeader } from '@/components/ui/presence-ui'
 import RegisterMemberClient from './RegisterMemberClient'
 
 export default async function NewMemberPage() {
@@ -14,8 +15,11 @@ export default async function NewMemberPage() {
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold text-white">Register Member</h1>
-      <p className="mb-8 text-sm text-gray-500">Capture a face photo to enroll a new member</p>
+      <PageHeader
+        eyebrow="Enrollment"
+        title="Register member"
+        description="Capture a high-quality face descriptor, then attach member details for kiosk recognition."
+      />
       <RegisterMemberClient departments={departments || []} />
     </div>
   )

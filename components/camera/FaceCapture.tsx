@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { AlertCircle, Camera, CheckCircle, Loader2, RefreshCw } from 'lucide-react'
+import { AlertCircle, Camera, CheckCircle, Loader2, RefreshCw, ScanFace, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { getFaceDescriptor, loadModels } from '@/lib/face-api'
+import { StatusBadge, Surface } from '@/components/ui/presence-ui'
 
 interface FaceCaptureProps {
   onCapture: (descriptor: number[], photoDataUrl: string) => void
@@ -55,6 +56,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
   function stopCamera() {
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
+    if (videoRef.current) videoRef.current.srcObject = null
   }
 
   async function captureAndDetect() {
@@ -105,39 +107,41 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-video overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
-        <video
-          ref={videoRef}
-          className={`h-full w-full object-cover ${
-            status === 'idle' || status === 'loading-models' ? 'hidden' : ''
-          }`}
-          muted
-          playsInline
-        />
-        <canvas ref={canvasRef} className="hidden" />
+      <Surface className="overflow-hidden p-3">
+        <div className="relative aspect-video overflow-hidden rounded-lg bg-zinc-950 scanner-grid">
+          <video
+            ref={videoRef}
+            className={`h-full w-full object-cover ${
+              status === 'idle' || status === 'loading-models' ? 'hidden' : ''
+            }`}
+            muted
+            playsInline
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          <div className="pointer-events-none absolute inset-0 camera-mask" />
 
         {(status === 'idle' || status === 'loading-models') && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-800">
+            <div className="grid h-20 w-20 place-items-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
               {status === 'loading-models' ? (
-                <Loader2 size={32} className="animate-spin text-indigo-400" />
+                <Loader2 size={32} className="animate-spin" />
               ) : (
-                <Camera size={32} className="text-gray-600" />
+                <Camera size={32} />
               )}
             </div>
-            <p className="px-4 text-center text-sm text-gray-500">{statusMessage}</p>
+            <p className="px-4 text-center text-sm font-medium text-zinc-200">{statusMessage}</p>
           </div>
         )}
 
         {(status === 'ready' || status === 'detecting') && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div
-              className={`relative h-56 w-48 rounded-full border-2 transition-colors ${
-                status === 'detecting' ? 'border-indigo-400' : 'border-gray-600'
+              className={`relative h-56 w-48 rounded-[42%] border-2 transition-colors ${
+                status === 'detecting' ? 'border-cyan-300' : 'border-white/50'
               }`}
             >
               {status === 'detecting' && (
-                <div className="pulse-ring absolute inset-0 rounded-full border-2 border-indigo-400" />
+                <div className="pulse-ring absolute inset-0 rounded-[42%] border-2 border-cyan-300" />
               )}
             </div>
           </div>
@@ -150,28 +154,58 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
         )}
 
         {status === 'success' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/10">
+          <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/15">
             <div className="text-center">
-              <CheckCircle size={48} className="mx-auto mb-2 text-emerald-400" />
-              <p className="font-medium text-emerald-400">Face Captured</p>
+              <CheckCircle size={48} className="mx-auto mb-2 text-emerald-200" />
+              <p className="font-semibold text-emerald-100">Face captured</p>
             </div>
           </div>
         )}
 
         {status === 'detecting' && (
-          <div className="scan-line absolute left-0 right-0 h-0.5 bg-indigo-400/60" />
+          <div className="scan-line absolute left-0 right-0 h-0.5 bg-cyan-300/70" />
         )}
+
+          {(status === 'ready' || status === 'detecting') && (
+            <div className="absolute left-4 top-4">
+              <StatusBadge tone={status === 'detecting' ? 'cyan' : 'emerald'} className="border-white/10 bg-black/45 text-white backdrop-blur">
+                {status === 'detecting' ? 'Detecting' : 'Camera ready'}
+              </StatusBadge>
+            </div>
+          )}
+        </div>
+      </Surface>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-3">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-50 text-cyan-700 ring-1 ring-cyan-100">
+            <ScanFace size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Capture gate</p>
+            <p className="text-sm font-semibold text-zinc-900">Single visible face</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-3">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+            <ShieldCheck size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Quality</p>
+            <p className="text-sm font-semibold text-zinc-900">Even light, centered face</p>
+          </div>
+        </div>
       </div>
 
       <div
-        className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm ${
+        className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${
           status === 'success'
-            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
+            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
             : status === 'error'
-              ? 'border-red-500/20 bg-red-500/10 text-red-400'
+              ? 'border-rose-200 bg-rose-50 text-rose-800'
               : status === 'detecting'
-                ? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400'
-                : 'border-gray-800 bg-gray-900 text-gray-400'
+                ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
+                : 'border-zinc-200 bg-white text-zinc-600'
         }`}
       >
         {status === 'detecting' && <Loader2 size={14} className="shrink-0 animate-spin" />}
@@ -186,7 +220,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
             type="button"
             onClick={startCamera}
             disabled={isLoading}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Camera size={16} />
             Start Camera
@@ -198,7 +232,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
             type="button"
             onClick={captureAndDetect}
             disabled={isLoading}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Capture Face
           </button>
@@ -209,7 +243,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
             type="button"
             onClick={reset}
             disabled={isLoading}
-            className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-700 px-4 py-2.5 text-sm text-gray-400 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-cyan-200 hover:text-cyan-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw size={14} />
             Retake
@@ -220,7 +254,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
           <button
             type="button"
             onClick={startCamera}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-800 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-zinc-950 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
           >
             <RefreshCw size={14} />
             Try Again

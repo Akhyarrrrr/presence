@@ -118,14 +118,3 @@ npm run build
 npm run start
 npm run lint
 ```
-
-## Production Notes
-
-- Set the same environment variables in Vercel or your hosting provider.
-- Make sure Supabase Auth settings allow your deployed domain.
-- Keep `.env.local` private. Use `.env.local.example` as the committed template.
-- Camera access requires HTTPS in production.
-
-## License
-
-MIT

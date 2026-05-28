@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, BadgeCheck, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import FaceCapture from '@/components/camera/FaceCapture'
 import { createClient } from '@/lib/supabase/client'
 import type { Department } from '@/types'
+import { StatusBadge, Surface } from '@/components/ui/presence-ui'
 
 export default function RegisterMemberClient({
   departments,
@@ -70,21 +73,44 @@ export default function RegisterMemberClient({
   }
 
   const inputClass =
-    'w-full rounded-lg border border-gray-700 bg-gray-800 px-3.5 py-2.5 text-sm text-white placeholder-gray-500 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500'
+    'w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-cyan-600'
 
   return (
-    <div className="grid max-w-4xl grid-cols-1 gap-8 lg:grid-cols-2">
+    <div className="grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
       <div>
-        <h2 className="mb-4 text-sm font-semibold text-gray-300">Step 1 - Capture Face</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Step 1</p>
+            <h2 className="mt-1 text-lg font-bold text-zinc-950">Capture identity signal</h2>
+          </div>
+          <StatusBadge tone={faceData ? 'emerald' : 'zinc'}>
+            {faceData ? 'Captured' : 'Waiting'}
+          </StatusBadge>
+        </div>
         <FaceCapture onCapture={handleCapture} isLoading={saving} />
       </div>
 
-      <div>
-        <h2 className="mb-4 text-sm font-semibold text-gray-300">Step 2 - Member Details</h2>
+      <Surface className="p-5">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Step 2</p>
+            <h2 className="mt-1 text-lg font-bold text-zinc-950">Member details</h2>
+          </div>
+          <Link
+            href="/members"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:border-cyan-200 hover:text-cyan-800"
+          >
+            <ArrowLeft size={14} />
+            Back
+          </Link>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Full Name *</label>
+            <label htmlFor="member-name" className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              Full Name *
+            </label>
             <input
+              id="member-name"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="e.g. Akhyar"
@@ -94,8 +120,11 @@ export default function RegisterMemberClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Employee / Student ID *</label>
+            <label htmlFor="member-id" className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              Employee / Student ID *
+            </label>
             <input
+              id="member-id"
               value={form.employee_id}
               onChange={(e) => setForm((prev) => ({ ...prev, employee_id: e.target.value }))}
               placeholder="e.g. EMP-001"
@@ -105,8 +134,11 @@ export default function RegisterMemberClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Department</label>
+            <label htmlFor="member-department" className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              Department
+            </label>
             <select
+              id="member-department"
               value={form.department_id}
               onChange={(e) => setForm((prev) => ({ ...prev, department_id: e.target.value }))}
               className={inputClass}
@@ -121,8 +153,11 @@ export default function RegisterMemberClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Email</label>
+            <label htmlFor="member-email" className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              Email
+            </label>
             <input
+              id="member-email"
               type="email"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -132,20 +167,28 @@ export default function RegisterMemberClient({
           </div>
 
           {!faceData && (
-            <div className="rounded-xl border border-amber-400/10 bg-amber-400/5 px-4 py-3 text-sm text-amber-400">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
               Capture a face photo first before saving.
+            </div>
+          )}
+
+          {faceData && (
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+              <BadgeCheck size={16} />
+              Face descriptor is ready to be enrolled.
             </div>
           )}
 
           <button
             type="submit"
             disabled={saving || !faceData}
-            className="w-full cursor-pointer rounded-xl bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-3 text-sm font-semibold text-white transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            <Save size={16} />
             {saving ? 'Registering...' : 'Register Member'}
           </button>
         </form>
-      </div>
+      </Surface>
     </div>
   )
 }

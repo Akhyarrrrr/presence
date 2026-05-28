@@ -89,12 +89,12 @@ export function drawDetections(
   if (!ctx) return
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  ctx.font = '13px "Geist", system-ui, sans-serif'
+  ctx.font = '13px "Plus Jakarta Sans", system-ui, sans-serif'
 
   resized.forEach((detection, i) => {
     const box = detection.detection.box
     const match = matches[i]
-    const color = match?.matched ? '#10b981' : '#6366f1'
+    const color = match?.matched ? '#10b981' : '#0891b2'
     const label = match ? `${match.label} (${Math.round(match.confidence * 100)}%)` : 'Unknown'
 
     ctx.strokeStyle = color
