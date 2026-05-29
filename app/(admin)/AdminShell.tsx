@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   ClipboardList,
+  CalendarDays,
   ExternalLink,
   LayoutDashboard,
   LogOut,
   Menu,
+  FileText,
   ScanFace,
+  Timer,
   Users,
   X,
 } from 'lucide-react'
@@ -22,6 +25,9 @@ import { cn } from '@/lib/utils'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/members', label: 'Members', icon: Users },
+  { href: '/dashboard/shifts', label: 'Shifts', icon: Timer },
+  { href: '/dashboard/schedules', label: 'Schedules', icon: CalendarDays },
+  { href: '/dashboard/reports', label: 'Reports', icon: FileText },
   { href: '/logs', label: 'Attendance Logs', icon: ClipboardList },
 ]
 

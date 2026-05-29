@@ -1,5 +1,6 @@
 import { CalendarSearch, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentAdminContext } from '@/lib/supabase/organization'
 import { formatDate, formatTime } from '@/lib/utils'
 import { EmptyState, PageHeader, StatusBadge, Surface } from '@/components/ui/presence-ui'
 import DateFilter from './DateFilter'
@@ -11,6 +12,18 @@ export default async function LogsPage({
 }>) {
   const { date } = await searchParams
   const supabase = await createClient()
+  const adminContext = await getCurrentAdminContext(supabase)
+
+  if (!adminContext) {
+    return (
+      <EmptyState
+        icon={CalendarSearch}
+        title="Organization access is not ready"
+        description="Your admin account is not linked to an organization yet. Apply the Phase 1 SQL migration and sign in again."
+      />
+    )
+  }
+
   const today = new Date().toISOString().split('T')[0]
   const selectedDate = date || today
 
@@ -18,6 +31,7 @@ export default async function LogsPage({
     .from('attendance_logs')
     .select('*, members(name, employee_id, photo_url, departments(name))')
     .eq('date', selectedDate)
+    .eq('organization_id', adminContext.organization.id)
     .order('check_in_at', { ascending: false })
 
   return (

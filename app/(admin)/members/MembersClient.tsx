@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Building2, Search, ShieldCheck, Trash2, UserPlus } from 'lucide-react'
+import { Building2, Search, ShieldCheck, UserMinus, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Member } from '@/types'
 import { EmptyState, Surface } from '@/components/ui/presence-ui'
 
-export default function MembersClient({ initialMembers }: Readonly<{ initialMembers: Member[] }>) {
+export default function MembersClient({
+  initialMembers,
+  organizationId,
+}: Readonly<{ initialMembers: Member[]; organizationId: string }>) {
   const [members, setMembers] = useState(initialMembers)
   const [search, setSearch] = useState('')
 
@@ -18,19 +21,23 @@ export default function MembersClient({ initialMembers }: Readonly<{ initialMemb
       member.employee_id.toLowerCase().includes(search.toLowerCase())
   )
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Remove ${name}? Their attendance history will also be deleted.`)) return
+  async function handleDeactivate(id: string, name: string) {
+    if (!confirm(`Deactivate ${name}? They will no longer appear in kiosk recognition.`)) return
 
     const supabase = createClient()
-    const { error } = await supabase.from('members').delete().eq('id', id)
+    const { error } = await supabase
+      .from('members')
+      .update({ is_active: false })
+      .eq('id', id)
+      .eq('organization_id', organizationId)
 
     if (error) {
-      toast.error('Failed to remove member')
+      toast.error('Failed to deactivate member')
       return
     }
 
     setMembers((prev) => prev.filter((member) => member.id !== id))
-    toast.success(`${name} removed`)
+    toast.success(`${name} deactivated`)
   }
 
   return (
@@ -78,11 +85,11 @@ export default function MembersClient({ initialMembers }: Readonly<{ initialMemb
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleDelete(member.id, member.name)}
-                  aria-label={`Remove ${member.name}`}
+                  onClick={() => handleDeactivate(member.id, member.name)}
+                  aria-label={`Deactivate ${member.name}`}
                   className="cursor-pointer rounded-md p-1.5 text-zinc-400 opacity-100 transition hover:bg-rose-50 hover:text-rose-700 sm:opacity-0 sm:group-hover:opacity-100"
                 >
-                  <Trash2 size={14} />
+                  <UserMinus size={14} />
                 </button>
               </div>
 

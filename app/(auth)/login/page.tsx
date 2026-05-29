@@ -64,10 +64,10 @@ export default function LoginPage() {
             </div>
             <StatusBadge tone="cyan">
               <LockKeyhole size={12} />
-              Admin access
+              Workspace access
             </StatusBadge>
-            <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Sign in</h2>
-            <p className="mt-2 text-sm text-zinc-500">Manage members, scanner activity, and logs.</p>
+            <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Workspace Login</h2>
+            <p className="mt-2 text-sm text-zinc-500">Owner/Admin login for operations and attendance management.</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">

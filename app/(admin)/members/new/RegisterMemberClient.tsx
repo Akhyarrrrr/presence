@@ -10,11 +10,17 @@ import { createClient } from '@/lib/supabase/client'
 import type { Department } from '@/types'
 import { StatusBadge, Surface } from '@/components/ui/presence-ui'
 
+function toVectorLiteral(descriptor: number[]) {
+  return `[${descriptor.join(',')}]`
+}
+
 export default function RegisterMemberClient({
   departments,
-}: Readonly<{ departments: Department[] }>) {
+  organizationId,
+}: Readonly<{ departments: Department[]; organizationId: string }>) {
   const router = useRouter()
   const [form, setForm] = useState({ name: '', employee_id: '', department_id: '', email: '' })
+  const [customDepartmentName, setCustomDepartmentName] = useState('')
   const [faceData, setFaceData] = useState<{ descriptor: number[]; photoDataUrl: string } | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -38,6 +44,41 @@ export default function RegisterMemberClient({
 
     setSaving(true)
     const supabase = createClient()
+    let departmentId: string | null = form.department_id || null
+
+    if (form.department_id === '__custom__') {
+      const customName = customDepartmentName.trim()
+      if (!customName) {
+        toast.error('Please enter a department name.')
+        setSaving(false)
+        return
+      }
+
+      const { data: createdDepartment, error: createDepartmentError } = await supabase
+        .from('departments')
+        .insert({ name: customName })
+        .select('id')
+        .single()
+
+      if (createDepartmentError) {
+        const message = createDepartmentError.message.toLowerCase()
+        const isDuplicateName =
+          message.includes('duplicate key') ||
+          message.includes('already exists') ||
+          message.includes('departments_name_key') ||
+          createDepartmentError.code === '23505'
+
+        if (isDuplicateName) {
+          toast.error('Department already exists. Please select it from the list.')
+        } else {
+          toast.error('Failed to create department. Please try again.')
+        }
+        setSaving(false)
+        return
+      }
+
+      departmentId = createdDepartment.id
+    }
 
     let photoUrl: string | null = null
     const blob = await fetch(faceData.photoDataUrl).then((response) => response.blob())
@@ -53,17 +94,46 @@ export default function RegisterMemberClient({
       photoUrl = publicUrl
     }
 
-    const { error } = await supabase.from('members').insert({
-      name: form.name.trim(),
-      employee_id: form.employee_id.trim(),
-      department_id: form.department_id || null,
-      email: form.email.trim() || null,
-      face_descriptor: faceData.descriptor,
-      photo_url: photoUrl,
-    })
+    const { data: memberRow, error } = await supabase
+      .from('members')
+      .insert({
+        organization_id: organizationId,
+        name: form.name.trim(),
+        employee_id: form.employee_id.trim(),
+        department_id: departmentId,
+        email: form.email.trim() || null,
+        face_descriptor: faceData.descriptor,
+        photo_url: photoUrl,
+      })
+      .select('id')
+      .single()
 
     if (error) {
-      toast.error(error.message.includes('unique') ? 'Employee ID already exists' : error.message)
+      const isDuplicateEmployeeId =
+        error.code === '23505' || error.message.toLowerCase().includes('unique')
+      toast.error(
+        isDuplicateEmployeeId
+          ? 'Employee ID already exists'
+          : 'Member registration could not be completed. Please try again.'
+      )
+      setSaving(false)
+      return
+    }
+
+    const { error: descriptorError } = await supabase.from('member_face_descriptors').insert({
+      organization_id: organizationId,
+      member_id: memberRow.id,
+      descriptor: toVectorLiteral(faceData.descriptor),
+    })
+
+    if (descriptorError) {
+      await supabase
+        .from('members')
+        .delete()
+        .eq('id', memberRow.id)
+        .eq('organization_id', organizationId)
+
+      toast.error('Face enrollment could not be completed. Please try again.')
       setSaving(false)
       return
     }
@@ -140,7 +210,11 @@ export default function RegisterMemberClient({
             <select
               id="member-department"
               value={form.department_id}
-              onChange={(e) => setForm((prev) => ({ ...prev, department_id: e.target.value }))}
+              onChange={(e) => {
+                const nextDepartmentId = e.target.value
+                setForm((prev) => ({ ...prev, department_id: nextDepartmentId }))
+                if (nextDepartmentId !== '__custom__') setCustomDepartmentName('')
+              }}
               className={inputClass}
             >
               <option value="">No department</option>
@@ -149,8 +223,25 @@ export default function RegisterMemberClient({
                   {department.name}
                 </option>
               ))}
+              <option value="__custom__">Custom department...</option>
             </select>
           </div>
+
+          {form.department_id === '__custom__' && (
+            <div>
+              <label htmlFor="member-custom-department" className="mb-1.5 block text-sm font-semibold text-zinc-700">
+                Custom Department Name
+              </label>
+              <input
+                id="member-custom-department"
+                value={customDepartmentName}
+                onChange={(e) => setCustomDepartmentName(e.target.value)}
+                placeholder="e.g. Field Ops"
+                required
+                className={inputClass}
+              />
+            </div>
+          )}
 
           <div>
             <label htmlFor="member-email" className="mb-1.5 block text-sm font-semibold text-zinc-700">

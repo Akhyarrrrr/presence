@@ -16,7 +16,7 @@ export default function AttendancePage() {
           <BrandMark />
           <div className="flex shrink-0 items-center gap-2">
             <div className="hidden sm:block">
-              <StatusBadge tone="emerald">Local face processing</StatusBadge>
+              <StatusBadge tone="emerald">Server-verified matching</StatusBadge>
             </div>
             <SecondaryLink href="/login" className="px-3 py-2">
               Admin
@@ -33,12 +33,13 @@ export default function AttendancePage() {
               <Sparkles size={13} />
               Kiosk mode
             </p>
+            <p className="mb-2 text-sm font-semibold text-cyan-900">Employee check-in station. No login required.</p>
             <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-zinc-950 md:text-5xl">
               Fast, calm, and auditable attendance check-in.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-600 md:text-base">
-              Presence reads the live camera feed in the browser, matches registered identity
-              profiles, and records only the attendance result for today.
+              Presence verifies a live person, confirms identity securely, and records only
+              today&apos;s attendance result.
             </p>
           </div>
 
@@ -49,7 +50,7 @@ export default function AttendancePage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-zinc-950">Privacy first</p>
-                <p className="text-xs text-zinc-500">Recognition runs client-side.</p>
+                <p className="text-xs text-zinc-500">Identity verification is secured end to end.</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

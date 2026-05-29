@@ -41,33 +41,6 @@ export async function getAllFaceDetections(input: HTMLVideoElement | HTMLCanvasE
     .withFaceDescriptors()
 }
 
-export function matchFace(
-  queryDescriptor: Float32Array,
-  members: Array<{ id: string; name: string; face_descriptor: number[] }>,
-  threshold = 0.55
-): { memberId: string; memberName: string; distance: number; confidence: number } | null {
-  if (members.length === 0) return null
-
-  let bestMatch: { memberId: string; memberName: string; distance: number } | null = null
-
-  for (const member of members) {
-    const memberDescriptor = new Float32Array(member.face_descriptor)
-    const distance = faceapi.euclideanDistance(
-      Array.from(queryDescriptor),
-      Array.from(memberDescriptor)
-    )
-
-    if (!bestMatch || distance < bestMatch.distance) {
-      bestMatch = { memberId: member.id, memberName: member.name, distance }
-    }
-  }
-
-  if (!bestMatch || bestMatch.distance > threshold) return null
-
-  const confidence = Math.max(0, Math.round((1 - bestMatch.distance / threshold) * 100)) / 100
-  return { ...bestMatch, confidence }
-}
-
 type FaceDetectionWithDescriptor = faceapi.WithFaceDescriptor<
   faceapi.WithFaceLandmarks<{ detection: faceapi.FaceDetection }>
 >
