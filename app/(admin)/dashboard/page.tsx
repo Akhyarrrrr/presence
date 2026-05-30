@@ -16,6 +16,7 @@ import {
   MetricCard,
   PageHeader,
   PrimaryLink,
+  StatusPill,
   Surface,
 } from '@/components/ui/presence-ui'
 import DashboardCharts from './DashboardCharts'
@@ -141,7 +142,43 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Surface className="mb-6 overflow-hidden p-0">
+        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="p-5 md:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <StatusPill tone={attendanceRate >= 80 ? 'emerald' : attendanceRate >= 50 ? 'amber' : 'rose'}>
+                  {attendanceRate}% covered
+                </StatusPill>
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">
+                  Today&apos;s attendance posture
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+                  Monitor the arrival window, confirm kiosk activity, and close remaining open
+                  items from a single operations surface.
+                </p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">
+                  Work date
+                </p>
+                <p className="mt-1 font-mono text-sm font-semibold text-zinc-950">{today}</p>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-zinc-200 bg-zinc-950 p-5 text-white lg:border-l lg:border-t-0">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+              Open attention
+            </p>
+            <p className="mt-4 text-4xl font-bold tracking-tight">{absentCount}</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-300">
+              active member{absentCount === 1 ? '' : 's'} without a check-in record today.
+            </p>
+          </div>
+        </div>
+      </Surface>
+
+      <section aria-label="Attendance metrics" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, icon, tone, helper, progress }) => (
           <MetricCard
             key={label}
@@ -153,7 +190,7 @@ export default async function DashboardPage() {
             progress={progress}
           />
         ))}
-      </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <DashboardCharts chartData={chartData} />
@@ -178,8 +215,13 @@ export default async function DashboardPage() {
 
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Surface className="p-5 lg:col-span-2">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Readiness</p>
-          <h2 className="mt-1 text-lg font-bold tracking-tight text-zinc-950">Scanner operating model</h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Readiness</p>
+              <h2 className="mt-1 text-lg font-bold tracking-tight text-zinc-950">Scanner operating model</h2>
+            </div>
+            <StatusPill tone="zinc">MVP path</StatusPill>
+          </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {readinessItems.map(({ title, detail, icon: Icon }) => (
               <div key={title} className="rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
@@ -194,7 +236,7 @@ export default async function DashboardPage() {
         <Surface className="p-5">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">SLA watch</p>
           <h2 className="mt-1 text-lg font-bold tracking-tight text-zinc-950">Today&apos;s posture</h2>
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 flex flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <Clock3 size={17} className="text-zinc-500" />

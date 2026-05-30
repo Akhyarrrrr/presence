@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, LockKeyhole, ScanFace, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ClipboardList, LockKeyhole, ScanFace, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { BrandMark, StatusBadge, Surface } from '@/components/ui/presence-ui'
+import { BrandMark, Button, Field, StatusPill, Surface, TextInput } from '@/components/ui/presence-ui'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -33,88 +33,86 @@ export default function LoginPage() {
 
   return (
     <main id="main-content" className="grid min-h-screen place-items-center px-4 py-10">
-      <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_420px] lg:items-center">
-        <div className="hidden lg:block">
+      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center">
+        <section className="hidden lg:block" aria-labelledby="login-intro">
           <BrandMark />
-          <h1 className="mt-8 max-w-xl text-4xl font-bold tracking-tight text-zinc-950">
-            Operate attendance with cleaner visibility and stronger identity control.
+          <StatusPill tone="cyan" icon={LockKeyhole} className="mt-10">
+            Owner / Admin workspace
+          </StatusPill>
+          <h1 id="login-intro" className="mt-5 max-w-2xl text-4xl font-bold tracking-tight text-zinc-950">
+            Sign into the command center for attendance operations.
           </h1>
-          <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-600">
-            Manage registered profiles, review check-in evidence, and keep the kiosk workflow
-            running from one focused command center.
+          <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-600">
+            Manage identity profiles, shifts, schedules, realtime arrivals, logs, and monthly
+            reports from a focused workspace built for HR and operations teams.
           </p>
-          <div className="mt-8 grid max-w-lg gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <ScanFace size={18} className="text-cyan-700" />
-              <p className="mt-3 text-sm font-semibold text-zinc-950">Browser recognition</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">Models run close to the camera.</p>
-            </div>
-            <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <ShieldCheck size={18} className="text-emerald-700" />
-              <p className="mt-3 text-sm font-semibold text-zinc-950">Daily audit trail</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">Duplicate-safe attendance logs.</p>
-            </div>
+          <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
+            {[
+              { title: 'Kiosk control', detail: 'Public check-in route', icon: ScanFace },
+              { title: 'Audit trail', detail: 'Duplicate-safe logs', icon: ClipboardList },
+              { title: 'Secure access', detail: 'Supabase Auth', icon: ShieldCheck },
+            ].map(({ title, detail, icon: Icon }) => (
+              <div key={title} className="rounded-lg border border-zinc-200 bg-white/88 p-4 shadow-[0_14px_44px_rgba(15,23,42,0.05)]">
+                <Icon size={18} className="text-cyan-700" />
+                <p className="mt-3 text-sm font-semibold text-zinc-950">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">{detail}</p>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
 
-        <Surface className="p-6">
+        <Surface className="p-6 md:p-7">
           <div className="mb-7">
-            <div className="mb-5 lg:hidden">
+            <div className="mb-6 lg:hidden">
               <BrandMark />
             </div>
-            <StatusBadge tone="cyan">
-              <LockKeyhole size={12} />
-              Workspace access
-            </StatusBadge>
-            <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Workspace Login</h2>
-            <p className="mt-2 text-sm text-zinc-500">Owner/Admin login for operations and attendance management.</p>
+            <StatusPill tone="cyan" icon={LockKeyhole}>
+              Workspace Login
+            </StatusPill>
+            <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Owner/Admin sign in</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              Access the protected workspace for roster, schedule, log, and report workflows.
+            </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Email
-              </label>
-              <input
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <Field id="email" label="Email">
+              <TextInput
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                autoComplete="email"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Password
-              </label>
-              <input
+            <Field id="password" label="Password">
+              <TextInput
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                autoComplete="current-password"
               />
-            </div>
+            </Field>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-3 text-sm font-semibold text-white transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
+            <Button type="submit" disabled={loading} size="lg" className="w-full">
+              {loading ? 'Signing in...' : 'Sign in to workspace'}
               {!loading && <ArrowRight size={15} />}
-            </button>
+            </Button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-zinc-500">
-            No account?{' '}
-            <Link href="/register" className="font-semibold text-cyan-700 transition hover:text-cyan-800">
-              Register
-            </Link>
-          </p>
+          <div className="mt-5 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <p className="text-sm leading-6 text-zinc-600">
+              Need the first workspace account?{' '}
+              <Link href="/register" className="font-semibold text-cyan-700 transition hover:text-cyan-800">
+                Create an owner account
+              </Link>
+              .
+            </p>
+          </div>
         </Surface>
       </div>
     </main>

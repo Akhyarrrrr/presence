@@ -4,6 +4,20 @@
   :root {
     --font-sans: var(--font-plus-jakarta);
     --font-mono: var(--font-geist-mono);
+    --presence-bg: #f6f8f7;
+    --presence-surface: #ffffff;
+    --presence-ink: #0f1720;
+    --presence-muted: #5d6875;
+    --presence-border: #dfe5e4;
+    --presence-action: #0e7490;
+    --presence-action-strong: #155e75;
+    --presence-success: #047857;
+    --presence-warning: #b45309;
+    --presence-danger: #be123c;
+    --presence-ring: rgba(14, 116, 144, 0.34);
+    --presence-shadow-soft: 0 18px 70px rgba(15, 23, 32, 0.07);
+    --presence-shadow-lift: 0 26px 90px rgba(15, 23, 32, 0.11);
+    color-scheme: light;
   }
 
   * {
@@ -15,13 +29,14 @@
   }
 
   body {
-    min-height: 100vh;
+    min-height: 100dvh;
     background:
-      linear-gradient(rgba(14, 116, 144, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 116, 144, 0.035) 1px, transparent 1px),
-      #f7faf8;
-    background-size: 32px 32px;
-    color: #102a2f;
+      linear-gradient(rgba(14, 116, 144, 0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 116, 144, 0.026) 1px, transparent 1px),
+      radial-gradient(circle at 15% 0%, rgba(14, 116, 144, 0.08), transparent 28rem),
+      var(--presence-bg);
+    background-size: 36px 36px, 36px 36px, auto;
+    color: var(--presence-ink);
   }
 
   ::selection {
@@ -43,12 +58,24 @@
   button,
   a,
   input,
-  select {
+  select,
+  textarea {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--presence-ring);
+    outline-offset: 2px;
   }
 }
 
 @layer components {
+  .premium-panel {
+    border: 1px solid color-mix(in srgb, var(--presence-border) 82%, transparent);
+    background: color-mix(in srgb, var(--presence-surface) 92%, transparent);
+    box-shadow: var(--presence-shadow-soft);
+  }
+
   .spotlight-card {
     position: relative;
     isolation: isolate;
@@ -88,6 +115,11 @@
   .skip-link {
     @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-cyan-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white;
   }
+
+  .reveal-up {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes scan-line {
@@ -116,6 +148,27 @@
 
 .pulse-ring {
   animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-up {
+      animation: reveal-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-range: entry 12% cover 34%;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

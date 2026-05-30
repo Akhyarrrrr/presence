@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Building2, ShieldCheck, UserPlus } from 'lucide-react'
+import { ArrowRight, Building2, ShieldCheck, UserCog, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { BrandMark, StatusBadge, Surface } from '@/components/ui/presence-ui'
+import { BrandMark, Button, Field, StatusPill, Surface, TextInput } from '@/components/ui/presence-ui'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -35,118 +35,115 @@ export default function RegisterPage() {
 
   return (
     <main id="main-content" className="grid min-h-screen place-items-center px-4 py-10">
-      <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_420px] lg:items-center">
-        <div className="hidden lg:block">
+      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_450px] lg:items-center">
+        <section className="hidden lg:block" aria-labelledby="register-intro">
           <BrandMark />
-          <h1 className="mt-8 max-w-xl text-4xl font-bold tracking-tight text-zinc-950">
-            Create your organization workspace and first Owner account.
+          <StatusPill tone="emerald" icon={Building2} className="mt-10">
+            Workspace setup
+          </StatusPill>
+          <h1 id="register-intro" className="mt-5 max-w-2xl text-4xl font-bold tracking-tight text-zinc-950">
+            Create the first owner account for attendance operations.
           </h1>
           <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-600">
-            This registration is for workspace setup. Employees do not need accounts for kiosk check-in.
+            The current MVP signs up the owner through Supabase Auth. Organization and owner profile
+            fields help the UI read correctly today, but they are not persisted by this form yet.
           </p>
-          <div className="mt-8 grid max-w-lg gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <Building2 size={18} className="text-cyan-700" />
-              <p className="mt-3 text-sm font-semibold text-zinc-950">Department-ready</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">Roster data stays structured.</p>
-            </div>
-            <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <ShieldCheck size={18} className="text-emerald-700" />
-              <p className="mt-3 text-sm font-semibold text-zinc-950">Protected admin</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">Supabase authentication handles access.</p>
-            </div>
+          <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
+            {[
+              { title: 'Owner account', detail: 'First admin sign-in', icon: UserCog },
+              { title: 'Managed members', detail: 'Employees do not self-register', icon: Users },
+              { title: 'Future invites', detail: 'Approval flow is planned', icon: ShieldCheck },
+            ].map(({ title, detail, icon: Icon }) => (
+              <div key={title} className="rounded-lg border border-zinc-200 bg-white/88 p-4 shadow-[0_14px_44px_rgba(15,23,42,0.05)]">
+                <Icon size={18} className="text-cyan-700" />
+                <p className="mt-3 text-sm font-semibold text-zinc-950">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">{detail}</p>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
 
-        <Surface className="p-6">
+        <Surface className="p-6 md:p-7">
           <div className="mb-7">
-            <div className="mb-5 lg:hidden">
+            <div className="mb-6 lg:hidden">
               <BrandMark />
             </div>
-            <StatusBadge tone="emerald">
-              <UserPlus size={12} />
-              Owner setup
-            </StatusBadge>
+            <StatusPill tone="emerald" icon={UserPlus}>
+              Create Organization
+            </StatusPill>
             <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Create Owner Account</h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              This creates the first workspace owner account in the current MVP flow.
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              This creates an owner login in the current MVP flow. Organization profile fields are
+              UI-only for now.
             </p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label htmlFor="organization-name" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Organization Name
-              </label>
-              <input
+          <form onSubmit={handleRegister} className="flex flex-col gap-4">
+            <Field
+              id="organization-name"
+              label="Organization Name"
+              hint="UI-only in the current MVP registration flow."
+            >
+              <TextInput
                 id="organization-name"
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="e.g. Acme Workforce"
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                placeholder="e.g. Northline Operations"
+                autoComplete="organization"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label htmlFor="owner-name" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Owner Name
-              </label>
-              <input
+            <Field
+              id="owner-name"
+              label="Owner Name"
+              hint="UI-only today; future profile persistence can attach this to the owner record."
+            >
+              <TextInput
                 id="owner-name"
                 value={ownerName}
                 onChange={(e) => setOwnerName(e.target.value)}
-                placeholder="e.g. Jane Doe"
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                placeholder="e.g. Operations Owner"
+                autoComplete="name"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Email
-              </label>
-              <input
+            <Field id="email" label="Email">
+              <TextInput
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                autoComplete="email"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-                Password
-              </label>
-              <input
+            <Field id="password" label="Password" hint="Use at least 6 characters.">
+              <TextInput
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 transition focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                autoComplete="new-password"
               />
-            </div>
+            </Field>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-3 text-sm font-semibold text-white transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            <Button type="submit" disabled={loading} size="lg" className="w-full">
               {loading ? 'Creating account...' : 'Create account'}
               {!loading && <ArrowRight size={15} />}
-            </button>
+            </Button>
           </form>
 
-          <div className="mt-4 space-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
-            <p>Members do not need an account to check in. Employees are registered by HR/Admin.</p>
-            <p>Admins should be invited or approved by the Owner in a future phase.</p>
-            <p>Note: organization and owner profile fields are UI-only in the current MVP.</p>
+          <div className="mt-5 grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs leading-5 text-zinc-600">
+            <p>Members do not self-register; HR/Admin creates member profiles for kiosk attendance.</p>
+            <p>Additional admin invite or approval is a future phase, not part of this form today.</p>
+            <p>Organization name and owner name are currently UI-only and are not sent to Supabase.</p>
           </div>
 
           <p className="mt-5 text-center text-sm text-zinc-500">
-            Already have one?{' '}
+            Already have workspace access?{' '}
             <Link href="/login" className="font-semibold text-cyan-700 transition hover:text-cyan-800">
               Sign in
             </Link>

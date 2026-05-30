@@ -1,10 +1,19 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Download, FileText, Loader2 } from 'lucide-react'
+import { CalendarDays, Download, FileText, Loader2, Table2, Timer } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { createClient } from '@/lib/supabase/client'
-import { EmptyState, StatusBadge, Surface } from '@/components/ui/presence-ui'
+import {
+  Button,
+  EmptyState,
+  Field,
+  StatTile,
+  StatusBadge,
+  StatusPill,
+  Surface,
+  TextInput,
+} from '@/components/ui/presence-ui'
 
 type AttendanceStatus = 'on_time' | 'late' | 'very_late' | 'no_shift' | null
 
@@ -97,6 +106,9 @@ export default function ReportsClient({
   const [hasWorkedMinutes, setHasWorkedMinutes] = useState(false)
 
   const summaryRows = useMemo(() => buildSummary(rows), [rows])
+  const totalPresentDays = summaryRows.reduce((sum, row) => sum + row.presentDays, 0)
+  const totalLateDays = summaryRows.reduce((sum, row) => sum + row.lateDays + row.veryLateDays, 0)
+  const totalWorkedMinutes = summaryRows.reduce((sum, row) => sum + row.totalWorkedMinutes, 0)
 
   async function loadReportData() {
     setLoading(true)
@@ -183,49 +195,68 @@ export default function ReportsClient({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <Surface className="p-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_auto]">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <label htmlFor="report-month" className="mb-1.5 block text-sm font-semibold text-zinc-700">
-              Report Month
-            </label>
-            <input
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Report builder</p>
+            <h2 className="mt-1 text-lg font-bold text-zinc-950">Monthly attendance summary</h2>
+            <p className="mt-1 text-sm leading-6 text-zinc-500">
+              Generate the current table first, then export the same summary to PDF.
+            </p>
+          </div>
+          <StatusPill tone={loaded ? 'emerald' : 'zinc'}>{loaded ? 'Loaded' : 'Not generated'}</StatusPill>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+          <Field id="report-month" label="Report Month">
+            <TextInput
               id="report-month"
               type="month"
               value={month}
               onChange={(event) => setMonth(event.target.value)}
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm font-medium text-zinc-950 focus:outline-none focus:ring-2 focus:ring-cyan-600"
             />
-          </div>
-          <div className="flex items-end gap-3">
-            <button
+          </Field>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <Button
               type="button"
               onClick={loadReportData}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-md bg-cyan-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-50"
+              size="lg"
+              className="w-full sm:w-auto"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
               Generate Summary
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={downloadPdf}
               disabled={!summaryRows.length}
-              className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 transition hover:border-cyan-200 hover:text-cyan-800 disabled:cursor-not-allowed disabled:opacity-50"
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto"
             >
               <Download size={16} />
               Download PDF
-            </button>
-            <StatusBadge tone={hasWorkedMinutes ? 'emerald' : 'zinc'}>
-              {hasWorkedMinutes ? 'Worked minutes included' : 'Worked minutes unavailable'}
-            </StatusBadge>
+            </Button>
+            <div className="flex items-end">
+              <StatusBadge tone={hasWorkedMinutes ? 'emerald' : 'zinc'}>
+                {hasWorkedMinutes ? 'Worked minutes included' : 'Worked minutes unavailable'}
+              </StatusBadge>
+            </div>
           </div>
         </div>
       </Surface>
 
+      {!!summaryRows.length && (
+        <section aria-label="Report summary" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatTile label="Members" value={summaryRows.length} icon={Table2} tone="cyan" />
+          <StatTile label="Present days" value={totalPresentDays} icon={CalendarDays} tone="emerald" />
+          <StatTile label="Exceptions" value={totalLateDays} icon={Timer} tone={totalLateDays ? 'amber' : 'zinc'} />
+        </section>
+      )}
+
       {error && (
-        <Surface className="border-rose-200 bg-rose-50 p-4">
+        <Surface className="border-rose-200 bg-rose-50 p-4" role="alert">
           <p className="text-sm font-semibold text-rose-700">{error}</p>
         </Surface>
       )}
@@ -239,33 +270,71 @@ export default function ReportsClient({
       )}
 
       {!!summaryRows.length && (
-        <Surface className="overflow-x-auto p-0">
-          <table className="min-w-full">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/70">
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Member</th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Present Days</th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Late Days</th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Very Late Days</th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Worked Minutes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summaryRows.map((row) => (
-                <tr key={`${row.employeeId}-${row.memberName}`} className="border-b border-zinc-100 last:border-b-0">
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-semibold text-zinc-950">{row.memberName}</p>
-                    <p className="text-xs text-zinc-500">{row.employeeId}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.presentDays}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.lateDays}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.veryLateDays}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-900">{formatWorkedMinutes(row.totalWorkedMinutes)}</td>
+        <>
+          <div className="grid gap-3 md:hidden">
+            {summaryRows.map((row) => (
+              <Surface key={`${row.employeeId}-${row.memberName}`} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-950">{row.memberName}</p>
+                    <p className="mt-1 text-xs text-zinc-500">{row.employeeId}</p>
+                  </div>
+                  <StatusBadge tone={row.lateDays + row.veryLateDays ? 'amber' : 'emerald'}>
+                    {row.presentDays} present
+                  </StatusBadge>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-zinc-200 pt-3 text-xs">
+                  <div>
+                    <p className="font-bold uppercase tracking-[0.12em] text-zinc-500">Late</p>
+                    <p className="mt-1 font-semibold text-zinc-900">{row.lateDays}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold uppercase tracking-[0.12em] text-zinc-500">Very late</p>
+                    <p className="mt-1 font-semibold text-zinc-900">{row.veryLateDays}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold uppercase tracking-[0.12em] text-zinc-500">Worked</p>
+                    <p className="mt-1 font-semibold text-zinc-900">{formatWorkedMinutes(row.totalWorkedMinutes)}</p>
+                  </div>
+                </div>
+              </Surface>
+            ))}
+          </div>
+
+          <Surface className="hidden overflow-x-auto p-0 md:block">
+            <table className="min-w-full">
+              <caption className="sr-only">Monthly attendance report for {toMonthLabel(month)}</caption>
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50/70">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Member</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Present Days</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Late Days</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Very Late Days</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">Worked Minutes</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Surface>
+              </thead>
+              <tbody>
+                {summaryRows.map((row) => (
+                  <tr key={`${row.employeeId}-${row.memberName}`} className="border-b border-zinc-100 last:border-b-0">
+                    <td className="px-4 py-3">
+                      <p className="text-sm font-semibold text-zinc-950">{row.memberName}</p>
+                      <p className="text-xs text-zinc-500">{row.employeeId}</p>
+                    </td>
+                    <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.presentDays}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.lateDays}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-zinc-900">{row.veryLateDays}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-zinc-900">{formatWorkedMinutes(row.totalWorkedMinutes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {hasWorkedMinutes && (
+              <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-700">
+                Total worked time: {formatWorkedMinutes(totalWorkedMinutes)}
+              </div>
+            )}
+          </Surface>
+        </>
       )}
     </div>
   )

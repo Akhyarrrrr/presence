@@ -7,9 +7,13 @@ import {
   AlertTriangle,
   Camera,
   CheckCircle,
+  CheckCircle2,
+  Clock3,
   Eye,
+  Fingerprint,
   Loader2,
   Radio,
+  RefreshCw,
   ScanFace,
   ShieldCheck,
   StopCircle,
@@ -25,7 +29,7 @@ import {
 } from '@/lib/liveness'
 import { formatTime } from '@/lib/utils'
 import type { AttendanceStatus, Member } from '@/types'
-import { StatusBadge, Surface } from '@/components/ui/presence-ui'
+import { Button, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
 
 interface RecentRecord {
   member: Member
@@ -389,17 +393,70 @@ export default function AttendanceScanner() {
         ? 'Verification timed out'
         : livenessState === 'center_calibration'
           ? 'Look straight at the camera'
-        : livenessState === 'move_head'
-          ? 'Move your head slightly left or right'
+          : livenessState === 'move_head'
+            ? 'Move your head slightly left or right'
             : livenessState === 'return_center'
               ? 'Look straight again'
-            : 'Looking for face'
+              : 'Looking for face'
+  const livenessTone: 'emerald' | 'rose' | 'amber' =
+    livenessState === 'verified'
+      ? 'emerald'
+      : livenessState === 'failed'
+        ? 'rose'
+        : 'amber'
+  const liveStatusText = `${scannerLabel}. ${livenessLabel}. ${todayLogs.size} of ${members.length} active members checked in today.`
+  const progressText =
+    safeProgress === 0
+      ? 'Waiting for stable face'
+      : safeProgress === 1
+        ? 'Stable face detected'
+        : safeProgress === 2
+          ? 'Head movement detected'
+          : 'Liveness verified'
+  const livenessSteps = [
+    {
+      label: 'Stable face',
+      detail: 'Hold steady',
+      active: livenessState === 'center_calibration',
+      complete: safeProgress >= 1,
+    },
+    {
+      label: 'Slight turn',
+      detail: 'Left or right',
+      active: livenessState === 'move_head',
+      complete: safeProgress >= 2,
+    },
+    {
+      label: 'Return center',
+      detail: 'Look straight',
+      active: livenessState === 'return_center',
+      complete: safeProgress >= 3,
+    },
+  ]
 
   return (
-    <div className="mx-auto grid w-[calc(100vw-2rem)] min-w-0 grid-cols-1 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="mx-auto grid w-[calc(100vw-2rem)] min-w-0 grid-cols-1 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="sr-only" role="status" aria-live="polite">
+        {liveStatusText}
+      </div>
+
       <div className="min-w-0 space-y-4">
-        <Surface className="overflow-hidden p-3">
-          <div className="relative aspect-video overflow-hidden rounded-lg bg-zinc-950 scanner-grid">
+        <Surface className="overflow-hidden p-2">
+          <div className="flex flex-col gap-3 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
+                Verification camera
+              </p>
+              <p className="mt-1 text-sm font-semibold text-zinc-950">
+                Keep your face centered in the frame.
+              </p>
+            </div>
+            <StatusPill tone={status === 'scanning' ? 'emerald' : status === 'error' ? 'rose' : 'zinc'}>
+              {scannerLabel}
+            </StatusPill>
+          </div>
+
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-zinc-950 scanner-grid sm:aspect-video">
             <video
               ref={videoRef}
               className={`h-full w-full object-cover ${status !== 'scanning' ? 'hidden' : ''}`}
@@ -419,17 +476,17 @@ export default function AttendanceScanner() {
                   <ScanFace size={42} />
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-white">Scanner is ready</p>
+                  <p className="text-xl font-semibold text-white">Scanner ready</p>
                   <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-zinc-300 sm:max-w-md">
-                    Start the live feed when the entrance desk is active. Registered members will be
-                    matched automatically.
+                    Start the live feed when the entrance station is active. Registered members will
+                    be matched automatically after liveness is verified.
                   </p>
                 </div>
               </div>
             )}
 
             {status === 'loading' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center">
                 <Loader2 size={40} className="animate-spin text-cyan-300" />
                 <p className="font-medium text-white">Preparing recognition models</p>
                 <p className="text-sm text-zinc-400">First load can take a moment.</p>
@@ -437,44 +494,51 @@ export default function AttendanceScanner() {
             )}
 
             {status === 'error' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center">
                 <Camera size={30} className="text-rose-300" />
                 <p className="font-medium text-rose-100">Camera access failed</p>
-                <p className="max-w-sm text-center text-sm text-zinc-400">
+                <p className="max-w-sm text-sm leading-6 text-zinc-400">
                   Check browser permission and make sure another app is not using the camera.
                 </p>
-                <button
-                  type="button"
-                  onClick={startScanning}
-                  className="cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300"
-                >
+                <Button type="button" variant="secondary" size="sm" onClick={startScanning}>
+                  <RefreshCw size={14} />
                   Try again
-                </button>
+                </Button>
               </div>
             )}
 
             {status === 'scanning' && (
               <>
-                <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md border border-white/10 bg-black/45 px-3 py-2 backdrop-blur-sm">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-rose-400" />
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-white">Live</span>
-                  {detectedCount > 0 && (
-                    <span className="text-xs font-medium text-emerald-300">
-                      {detectedCount} face{detectedCount !== 1 ? 's' : ''} detected
+                <div className="absolute inset-x-3 top-3 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
+                  <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/50 px-3 py-2 backdrop-blur-sm">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-rose-400" />
+                    <span className="text-xs font-bold uppercase tracking-[0.18em] text-white">Live</span>
+                    {detectedCount > 0 && (
+                      <span className="text-xs font-medium text-emerald-300">
+                        {detectedCount} face{detectedCount !== 1 ? 's' : ''} detected
+                      </span>
+                    )}
+                  </div>
+                  <div className="rounded-md border border-white/10 bg-black/50 px-3 py-2 backdrop-blur-sm">
+                    <span className="text-xs font-medium text-white">
+                      {todayLogs.size} checked in today
                     </span>
-                  )}
+                  </div>
                 </div>
-                <div className="absolute right-4 top-4 rounded-md border border-white/10 bg-black/45 px-3 py-2 backdrop-blur-sm">
-                  <span className="text-xs font-medium text-white">{todayLogs.size} checked in today</span>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 rounded-md border border-white/10 bg-black/45 px-3 py-2 backdrop-blur-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Eye size={14} className="text-cyan-200" />
-                      <span className="text-base font-bold text-white">{livenessLabel}</span>
+
+                <div className="absolute inset-x-3 bottom-3 rounded-lg border border-white/10 bg-black/55 px-3 py-3 backdrop-blur-sm sm:inset-x-4 sm:bottom-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-2">
+                      <Eye size={15} className="mt-0.5 shrink-0 text-cyan-200" />
+                      <div>
+                        <span className="block text-sm font-bold text-white sm:text-base">
+                          {livenessLabel}
+                        </span>
+                        <span className="text-xs font-medium text-zinc-300">{progressText}</span>
+                      </div>
                     </div>
-                    <span className="text-xs font-bold text-cyan-200">
-                      {safeProgress === 0 ? '1/3 Face detected' : safeProgress === 1 ? '1/3 Face detected' : safeProgress === 2 ? '2/3 Head movement detected' : '3/3 Verified'}
+                    <span className="shrink-0 text-xs font-bold text-cyan-200">
+                      {safeProgress}/3
                     </span>
                   </div>
                 </div>
@@ -485,26 +549,29 @@ export default function AttendanceScanner() {
 
         <div className="flex gap-3">
           {(status === 'idle' || status === 'error') && (
-            <button
+            <Button
               type="button"
               onClick={startScanning}
               disabled={members.length === 0}
-              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              size="lg"
+              className="flex-1"
             >
               <ScanFace size={18} />
               Start Scanner
-            </button>
+            </Button>
           )}
 
           {status === 'scanning' && (
-            <button
+            <Button
               type="button"
               onClick={stopScanning}
-              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-zinc-950 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:ring-offset-2"
+              variant="secondary"
+              size="lg"
+              className="flex-1 border-zinc-300 bg-zinc-950 text-white hover:bg-zinc-800 hover:text-white"
             >
               <StopCircle size={18} />
               Stop Scanner
-            </button>
+            </Button>
           )}
         </div>
 
@@ -547,30 +614,62 @@ export default function AttendanceScanner() {
         </div>
 
         <Surface className="p-4">
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
-            <AlertTriangle size={14} />
-            Liveness
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                <AlertTriangle size={14} />
+                Liveness
+              </div>
+              <p className="mt-2 text-sm font-semibold text-zinc-900">{livenessLabel}</p>
+            </div>
+            <StatusBadge tone={livenessTone}>{safeProgress}/3</StatusBadge>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-zinc-900">{livenessLabel}</p>
-            <StatusBadge tone={livenessState === 'verified' ? 'emerald' : livenessState === 'failed' ? 'rose' : 'amber'}>
-              {safeProgress}/3
-            </StatusBadge>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            {livenessSteps.map((step) => (
+              <div
+                key={step.label}
+                className={`rounded-lg border px-3 py-3 transition ${
+                  step.complete
+                    ? 'border-emerald-200 bg-emerald-50'
+                    : step.active
+                      ? 'border-cyan-200 bg-cyan-50'
+                      : 'border-zinc-200 bg-zinc-50'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-600">
+                    {step.label}
+                  </p>
+                  {step.complete ? (
+                    <CheckCircle2 size={14} className="text-emerald-700" />
+                  ) : (
+                    <Fingerprint size={14} className={step.active ? 'text-cyan-700' : 'text-zinc-400'} />
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">{step.detail}</p>
+              </div>
+            ))}
           </div>
-          <p className="mt-2 text-xs text-zinc-500">Attendance is saved only after liveness verification.</p>
-          <p className="mt-1 text-xs text-zinc-500">Move your head slightly left or right, then return to center.</p>
+
+          <p className="mt-3 text-xs leading-5 text-zinc-500">
+            Attendance is saved only after liveness verification. Move your head slightly left or
+            right, then return to center.
+          </p>
           {livenessState === 'failed' && (
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
+              className="mt-3"
               onClick={() => {
                 livenessRef.current = createBlinkLivenessContext()
                 setChallengeProgress(0)
                 setLivenessState('center_calibration')
               }}
-              className="mt-3 cursor-pointer rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:border-cyan-200 hover:text-cyan-800"
             >
               Retry liveness
-            </button>
+            </Button>
           )}
           {process.env.NODE_ENV !== 'production' && livenessDebug && (
             <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-[11px] text-zinc-700">
@@ -591,17 +690,20 @@ export default function AttendanceScanner() {
               Verification ledger
             </p>
             <h2 className="mt-2 text-lg font-bold tracking-tight text-zinc-950">Recent Check-ins</h2>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Successful kiosk entries appear here for quick confirmation.
+            </p>
           </div>
-          <StatusBadge tone={status === 'scanning' ? 'emerald' : 'zinc'}>
+          <StatusPill tone={status === 'scanning' ? 'emerald' : 'zinc'}>
             {status === 'scanning' ? 'Live' : 'Idle'}
-          </StatusBadge>
+          </StatusPill>
         </div>
         {recentActivity.length === 0 ? (
           <div className="flex min-h-80 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-200 bg-zinc-50/70 p-6 text-center">
             <Activity size={34} className="mb-3 text-zinc-400" />
-            <p className="text-sm font-semibold text-zinc-800">No activity yet</p>
+            <p className="text-sm font-semibold text-zinc-800">No check-ins yet</p>
             <p className="mt-1 text-xs leading-5 text-zinc-500">Verified arrivals will stream here.</p>
-            <div className="mt-5 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+            <div className="mt-5 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
               <ShieldCheck size={14} />
               Duplicate-safe daily logs
             </div>
@@ -611,9 +713,9 @@ export default function AttendanceScanner() {
             {recentActivity.map((record, i) => (
               <div
                 key={`${record.member.id}-${i}`}
-                className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3"
+                className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.04)]"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-sm font-bold text-cyan-800 ring-1 ring-cyan-100">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-sm font-bold text-cyan-800 ring-1 ring-cyan-100">
                   {record.member.photo_url ? (
                     <img
                       src={record.member.photo_url}
@@ -626,11 +728,15 @@ export default function AttendanceScanner() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-zinc-950">{record.member.name}</p>
-                  <p className="text-xs text-zinc-500">
-                    {record.time} - {attendanceStatusLabel[record.attendanceStatus]}
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                    <span className="inline-flex items-center gap-1">
+                      <Clock3 size={12} />
+                      {record.time}
+                    </span>
+                    <span>{attendanceStatusLabel[record.attendanceStatus]}</span>
+                  </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">
+                <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-100">
                   <CheckCircle size={14} />
                   <span className="text-xs font-bold">
                     {Math.round(record.confidence * 100)}%
