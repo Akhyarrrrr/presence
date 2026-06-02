@@ -29,7 +29,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
 
   async function startCamera() {
     setStatus('loading-models')
-    setStatusMessage('Loading face recognition models...')
+    setStatusMessage('Loading face recognition models…')
 
     try {
       await loadModels()
@@ -63,7 +63,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
     if (!videoRef.current || !canvasRef.current) return
 
     setStatus('detecting')
-    setStatusMessage('Detecting face...')
+    setStatusMessage('Detecting face…')
 
     for (let i = 3; i >= 1; i -= 1) {
       setCountdown(i)
@@ -163,7 +163,7 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
         )}
 
         {status === 'detecting' && (
-          <div className="scan-line absolute left-0 right-0 h-0.5 bg-cyan-300/70" />
+          <div className="scan-line absolute inset-0" />
         )}
 
           {(status === 'ready' || status === 'detecting') && (
@@ -197,7 +197,17 @@ export default function FaceCapture({ onCapture, isLoading }: FaceCaptureProps) 
         </div>
       </div>
 
+      <Surface className="p-3">
+        <ol className="grid gap-1 text-xs leading-5 text-zinc-600">
+          <li>1. Start the camera and keep only one face in the frame.</li>
+          <li>2. Hold a steady position until the countdown finishes.</li>
+          <li>3. Retake the photo if it is blurry or poorly framed.</li>
+        </ol>
+      </Surface>
+
       <div
+        role="status"
+        aria-live="polite"
         className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${
           status === 'success'
             ? 'border-emerald-200 bg-emerald-50 text-emerald-800'

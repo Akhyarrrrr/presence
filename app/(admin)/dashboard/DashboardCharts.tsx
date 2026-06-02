@@ -43,8 +43,8 @@ export default function DashboardCharts({ chartData }: Props) {
           <AreaChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
             <defs>
               <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0891b2" stopOpacity={0.24} />
-                <stop offset="95%" stopColor="#0891b2" stopOpacity={0} />
+                <stop offset="5%" stopColor="#0f766e" stopOpacity={0.24} />
+                <stop offset="95%" stopColor="#0f766e" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
@@ -69,12 +69,12 @@ export default function DashboardCharts({ chartData }: Props) {
                 boxShadow: '0 18px 40px rgba(15, 23, 42, 0.10)',
               }}
               labelStyle={{ color: '#52525b' }}
-              itemStyle={{ color: '#0e7490' }}
+              itemStyle={{ color: '#0f766e' }}
             />
             <Area
               type="monotone"
               dataKey="count"
-              stroke="#0e7490"
+              stroke="#0f766e"
               strokeWidth={2}
               fill="url(#attendanceGradient)"
               name="Check-ins"

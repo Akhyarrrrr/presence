@@ -2,7 +2,7 @@ import { AlertTriangle, Building2, CalendarSearch, CheckCircle, Clock3, IdCard, 
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentAdminContext } from '@/lib/supabase/organization'
 import { formatDate, formatTime } from '@/lib/utils'
-import { EmptyState, PageHeader, StatTile, StatusBadge, Surface } from '@/components/ui/presence-ui'
+import { EmptyState, MemberAvatar, PageHeader, StatTile, StatusBadge, Surface } from '@/components/ui/presence-ui'
 import DateFilter from './DateFilter'
 
 type LogStatusKey = 'on_time' | 'late' | 'very_late' | 'no_shift' | 'present'
@@ -72,7 +72,7 @@ export default async function LogsPage({
         action={<DateFilter selectedDate={selectedDate} maxDate={today} />}
       />
 
-      <section aria-label="Attendance log summary" className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <section aria-label="Attendance log summary" className="reveal-stagger mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatTile
           label="Recorded"
           value={logs?.length || 0}
@@ -96,6 +96,13 @@ export default async function LogsPage({
         />
       </section>
 
+      <Surface className="mb-5 p-4">
+        <p className="text-sm leading-6 text-zinc-600">
+          Use the date filter for daily audits. Confidence values help validate face-match quality,
+          while late statuses follow the applicable shift rules.
+        </p>
+      </Surface>
+
       {!logs?.length ? (
         <EmptyState
           icon={CalendarSearch}
@@ -104,24 +111,14 @@ export default async function LogsPage({
         />
       ) : (
         <>
-          <div className="grid gap-3 md:hidden">
+          <div className="reveal-stagger grid gap-3 md:hidden">
             {logs.map((log) => {
               const statusKey = getStatusKey(log.status)
 
               return (
                 <Surface key={log.id} className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-xs font-bold text-cyan-800 ring-1 ring-cyan-100">
-                      {log.members?.photo_url ? (
-                        <img
-                          src={log.members.photo_url}
-                          alt={log.members?.name || 'Member'}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        log.members?.name?.[0]?.toUpperCase()
-                      )}
-                    </div>
+                    <MemberAvatar name={log.members?.name} photoUrl={log.members?.photo_url} className="h-11 w-11" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-zinc-950">{log.members?.name}</p>
                       <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
@@ -178,13 +175,7 @@ export default async function LogsPage({
                     <tr key={log.id} className="transition hover:bg-cyan-50/40">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-xs font-bold text-cyan-800 ring-1 ring-cyan-100">
-                            {log.members?.photo_url ? (
-                              <img src={log.members.photo_url} alt={log.members?.name || 'Member'} className="h-full w-full object-cover" />
-                            ) : (
-                              log.members?.name?.[0]
-                            )}
-                          </div>
+                          <MemberAvatar name={log.members?.name} photoUrl={log.members?.photo_url} className="h-9 w-9" sizes="36px" />
                           <div>
                             <p className="text-sm font-semibold text-zinc-950">{log.members?.name}</p>
                             <p className="text-xs text-zinc-500">{log.members?.employee_id}</p>

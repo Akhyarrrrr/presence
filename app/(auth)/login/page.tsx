@@ -7,6 +7,7 @@ import { ArrowRight, ClipboardList, LockKeyhole, ScanFace, ShieldCheck } from 'l
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { BrandMark, Button, Field, StatusPill, Surface, TextInput } from '@/components/ui/presence-ui'
+import { MotionPage } from '@/components/ui/motion'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -32,19 +33,19 @@ export default function LoginPage() {
   }
 
   return (
-    <main id="main-content" className="grid min-h-screen place-items-center px-4 py-10">
-      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center">
+    <main id="main-content" className="grid min-h-screen place-items-center px-4 py-8 md:py-12">
+      <MotionPage className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center">
         <section className="hidden lg:block" aria-labelledby="login-intro">
           <BrandMark />
           <StatusPill tone="cyan" icon={LockKeyhole} className="mt-10">
             Owner / Admin workspace
           </StatusPill>
-          <h1 id="login-intro" className="mt-5 max-w-2xl text-4xl font-bold tracking-tight text-zinc-950">
-            Sign into the command center for attendance operations.
+          <h1 id="login-intro" className="mt-5 max-w-2xl font-display text-5xl font-semibold tracking-tight text-zinc-950">
+            Operational control for workforce attendance.
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-600">
-            Manage identity profiles, shifts, schedules, realtime arrivals, logs, and monthly
-            reports from a focused workspace built for HR and operations teams.
+            Monitor arrivals in real time, manage member identity, and review attendance evidence
+            from one secure workspace designed for daily HR execution.
           </p>
           <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
             {[
@@ -84,6 +85,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                spellCheck={false}
               />
             </Field>
 
@@ -99,7 +101,7 @@ export default function LoginPage() {
             </Field>
 
             <Button type="submit" disabled={loading} size="lg" className="w-full">
-              {loading ? 'Signing in...' : 'Sign in to workspace'}
+              {loading ? 'Signing in…' : 'Sign in to workspace'}
               {!loading && <ArrowRight size={15} />}
             </Button>
           </form>
@@ -114,7 +116,7 @@ export default function LoginPage() {
             </p>
           </div>
         </Surface>
-      </div>
+      </MotionPage>
     </main>
   )
 }

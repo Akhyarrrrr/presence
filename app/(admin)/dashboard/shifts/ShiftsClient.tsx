@@ -146,7 +146,7 @@ export default function ShiftsClient({
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[390px_minmax(0,1fr)]">
+    <div className="reveal-stagger grid gap-5 xl:grid-cols-[390px_minmax(0,1fr)]">
       <Surface className="p-5">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -167,7 +167,8 @@ export default function ShiftsClient({
               id="shift-name"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Shift Pagi"
+              placeholder="e.g. Morning Shift…"
+              autoComplete="off"
             />
           </Field>
 
@@ -271,10 +272,14 @@ export default function ShiftsClient({
             )}
           </div>
         </form>
+
+        <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-xs leading-5 text-zinc-600">
+          These rules classify attendance. Shift changes do not modify previously recorded logs.
+        </div>
       </Surface>
 
       <div className="flex flex-col gap-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="reveal-stagger grid gap-3 sm:grid-cols-3">
           <StatTile label="Total" value={initialShifts.length} icon={Timer} tone="cyan" />
           <StatTile label="Active" value={activeCount} icon={CheckCircle} tone="emerald" />
           <StatTile label="Default tolerance" value="15m" icon={Clock3} tone="zinc" />
@@ -288,7 +293,7 @@ export default function ShiftsClient({
           />
         ) : (
           <>
-            <div className="grid gap-3 md:hidden">
+            <div className="reveal-stagger grid gap-3 md:hidden">
               {initialShifts.map((shift) => (
                 <Surface key={shift.id} className="p-4">
                   <div className="flex items-start justify-between gap-3">

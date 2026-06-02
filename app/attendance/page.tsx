@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  Info,
   Eye,
   Fingerprint,
   Home,
@@ -18,6 +19,7 @@ import {
   StatusPill,
   Surface,
 } from '@/components/ui/presence-ui'
+import { MotionPage } from '@/components/ui/motion'
 
 export const metadata: Metadata = {
   title: 'Attendance Scanner',
@@ -47,6 +49,13 @@ const checkInSteps = [
   },
 ]
 
+const quickTips = [
+  'Keep your face centered and avoid strong backlighting.',
+  'Remove masks or accessories that cover your face during verification.',
+  'Move your head slowly; exaggerated movement is not needed.',
+  'Wait for the success notification before leaving the kiosk.',
+]
+
 export default function AttendancePage() {
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -72,15 +81,16 @@ export default function AttendancePage() {
       </nav>
 
       <main id="main-content" className="mx-auto w-full max-w-7xl px-0 py-7 sm:px-6 lg:py-10">
-        <section className="mx-auto mb-7 grid w-[calc(100vw-2rem)] min-w-0 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
-          <div className="min-w-0">
+        <MotionPage>
+        <section className="reveal-stagger mx-auto mb-7 grid w-[calc(100vw-2rem)] min-w-0 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+          <div className="reveal-left min-w-0">
             <StatusPill tone="cyan" icon={Fingerprint}>
               Kiosk mode
             </StatusPill>
             <p className="mt-4 text-sm font-semibold text-cyan-900">
               Employee check-in station. No login required.
             </p>
-            <h1 className="mt-2 max-w-4xl text-3xl font-bold tracking-tight text-zinc-950 md:text-5xl">
+            <h1 className="mt-2 max-w-4xl font-display text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">
               Stand in frame. Prove liveness. Check in with confidence.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-600 md:text-base">
@@ -130,7 +140,7 @@ export default function AttendancePage() {
 
         <section
           aria-labelledby="check-in-flow-heading"
-          className="mx-auto mb-6 grid w-[calc(100vw-2rem)] gap-3 sm:w-full md:grid-cols-4"
+          className="reveal-stagger mx-auto mb-6 grid w-[calc(100vw-2rem)] gap-3 sm:w-full md:grid-cols-4"
         >
           <h2 id="check-in-flow-heading" className="sr-only">
             Check-in flow
@@ -138,7 +148,7 @@ export default function AttendancePage() {
           {checkInSteps.map(({ title, description, icon: Icon }, index) => (
             <div
               key={title}
-              className="rounded-lg border border-zinc-200 bg-white/86 p-4 shadow-[0_12px_42px_rgba(15,23,42,0.04)]"
+              className="reveal-scale rounded-lg border border-zinc-200 bg-white/86 p-4 shadow-[0_12px_42px_rgba(15,23,42,0.04)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-50 text-cyan-700 ring-1 ring-cyan-100">
@@ -154,7 +164,38 @@ export default function AttendancePage() {
           ))}
         </section>
 
+        <section
+          aria-labelledby="kiosk-guidance-heading"
+          className="reveal-stagger mx-auto mb-6 grid w-[calc(100vw-2rem)] gap-4 sm:w-full lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+        >
+          <div className="reveal-left rounded-lg border border-zinc-200 bg-white/88 p-5 shadow-[0_14px_42px_rgba(15,23,42,0.04)]">
+            <div className="mb-3 flex items-center gap-2">
+              <Info size={16} className="text-cyan-700" />
+              <h2 id="kiosk-guidance-heading" className="text-sm font-bold uppercase tracking-[0.16em] text-zinc-700">
+                How to use the kiosk
+              </h2>
+            </div>
+            <ol className="grid gap-2 text-sm leading-6 text-zinc-600">
+              <li>1. Stand about one arm&apos;s length from the camera.</li>
+              <li>2. Keep your face visible, then follow the on-screen head movement instructions.</li>
+              <li>3. Wait for the success status before entering the work area.</li>
+            </ol>
+          </div>
+          <div className="reveal-right rounded-lg border border-zinc-200 bg-zinc-50/80 p-5">
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-zinc-700">Quick verification tips</p>
+            <ul className="reveal-stagger mt-3 grid gap-2 text-sm leading-6 text-zinc-600">
+              {quickTips.map((tip) => (
+                <li key={tip} className="reveal-up flex gap-2">
+                  <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         <AttendanceScanner />
+        </MotionPage>
       </main>
     </div>
   )

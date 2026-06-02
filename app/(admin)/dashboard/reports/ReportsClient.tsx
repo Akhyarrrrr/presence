@@ -8,6 +8,7 @@ import {
   Button,
   EmptyState,
   Field,
+  Skeleton,
   StatTile,
   StatusBadge,
   StatusPill,
@@ -225,7 +226,7 @@ export default function ReportsClient({
               className="w-full sm:w-auto"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-              Generate Summary
+              {loading ? 'Generating…' : 'Generate Summary'}
             </Button>
             <Button
               type="button"
@@ -245,10 +246,14 @@ export default function ReportsClient({
             </div>
           </div>
         </div>
+        <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-xs leading-5 text-zinc-600">
+          Generate Summary loads attendance data for the selected month first, then exports the
+          same table to PDF so audit results stay consistent.
+        </div>
       </Surface>
 
       {!!summaryRows.length && (
-        <section aria-label="Report summary" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <section aria-label="Report summary" className="reveal-stagger grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatTile label="Members" value={summaryRows.length} icon={Table2} tone="cyan" />
           <StatTile label="Present days" value={totalPresentDays} icon={CalendarDays} tone="emerald" />
           <StatTile label="Exceptions" value={totalLateDays} icon={Timer} tone={totalLateDays ? 'amber' : 'zinc'} />
@@ -258,6 +263,19 @@ export default function ReportsClient({
       {error && (
         <Surface className="border-rose-200 bg-rose-50 p-4" role="alert">
           <p className="text-sm font-semibold text-rose-700">{error}</p>
+        </Surface>
+      )}
+
+      {loading && (
+        <Surface aria-busy="true" aria-label="Loading report summary" className="overflow-hidden p-0">
+          <div className="border-b border-zinc-200 bg-zinc-50/70 px-4 py-3">
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <div className="space-y-3 p-4">
+            {Array.from({ length: 5 }, (_, index) => (
+              <Skeleton key={index} className="h-11 w-full" />
+            ))}
+          </div>
         </Surface>
       )}
 
@@ -271,7 +289,7 @@ export default function ReportsClient({
 
       {!!summaryRows.length && (
         <>
-          <div className="grid gap-3 md:hidden">
+          <div className="reveal-stagger grid gap-3 md:hidden">
             {summaryRows.map((row) => (
               <Surface key={`${row.employeeId}-${row.memberName}`} className="p-4">
                 <div className="flex items-start justify-between gap-3">

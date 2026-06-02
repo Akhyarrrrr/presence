@@ -6,7 +6,7 @@ import { BadgeCheck, Building2, IdCard, Mail, Search, ShieldCheck, UserMinus, Us
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Member } from '@/types'
-import { Button, EmptyState, FilterBar, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
+import { Button, EmptyState, FilterBar, MemberAvatar, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
 
 export default function MembersClient({
   initialMembers,
@@ -68,13 +68,29 @@ export default function MembersClient({
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             id="member-search"
+            name="member-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or ID..."
+            placeholder="Search by name or ID…"
+            autoComplete="off"
             className="w-full rounded-lg border border-zinc-200 bg-white py-3 pl-10 pr-4 text-sm font-medium text-zinc-950 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2"
           />
         </div>
       </FilterBar>
+
+      <Surface className="p-4">
+        <div className="reveal-stagger grid gap-2 text-sm leading-6 text-zinc-600 sm:grid-cols-3">
+          <p className="reveal-up rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            Use full names and unique IDs to keep roster search fast.
+          </p>
+          <p className="reveal-up rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            Keep active status only for members who are allowed to check in.
+          </p>
+          <p className="reveal-up rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            Deactivate members instead of deleting them to preserve attendance history.
+          </p>
+        </div>
+      </Surface>
 
       {filtered.length === 0 ? (
         <EmptyState
@@ -97,17 +113,11 @@ export default function MembersClient({
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 lg:hidden">
+          <div className="reveal-stagger grid grid-cols-1 gap-4 lg:hidden">
             {filtered.map((member) => (
               <Surface key={member.id} className="group p-4" hover>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-lg font-bold text-cyan-800 ring-1 ring-cyan-100">
-                    {member.photo_url ? (
-                      <img src={member.photo_url} alt={member.name} className="h-full w-full object-cover" />
-                    ) : (
-                      member.name[0].toUpperCase()
-                    )}
-                  </div>
+                  <MemberAvatar name={member.name} photoUrl={member.photo_url} className="h-12 w-12 text-lg" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-zinc-950">{member.name}</p>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-zinc-500">
@@ -179,13 +189,7 @@ export default function MembersClient({
                     <tr key={member.id} className="transition hover:bg-cyan-50/40">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-sm font-bold text-cyan-800 ring-1 ring-cyan-100">
-                            {member.photo_url ? (
-                              <img src={member.photo_url} alt={member.name} className="h-full w-full object-cover" />
-                            ) : (
-                              member.name[0].toUpperCase()
-                            )}
-                          </div>
+                          <MemberAvatar name={member.name} photoUrl={member.photo_url} className="text-sm" />
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-zinc-950">{member.name}</p>
                             <p className="mt-0.5 text-xs text-zinc-500">{member.employee_id}</p>

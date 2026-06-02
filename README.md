@@ -2,6 +2,12 @@
 
 Presence is a workforce attendance platform built with Next.js and Supabase. It provides a public kiosk check-in experience with face detection + liveness verification, plus an admin control panel for member management, shift scheduling, attendance analytics, realtime monitoring, and PDF reporting.
 
+UI references:
+
+- `UI_DESIGN_SYSTEM.md`
+- `UI_ANIMATION_SPECS.md`
+- `UI_CHANGELOG.md`
+
 The project is intentionally phased: current production logic emphasizes secure server-side matching and server-side attendance writes while preserving operational reliability.
 
 ## Project Overview

@@ -1,12 +1,19 @@
 import type { Metadata } from 'next'
 import { GeistMono } from 'geist/font/mono'
-import { Plus_Jakarta_Sans } from 'next/font/google'
+import { Manrope, Newsreader } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { MotionEffects } from '@/components/ui/motion'
 import './globals.css'
 
-const plusJakarta = Plus_Jakarta_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-plus-jakarta',
+  variable: '--font-manrope',
+  display: 'swap',
+})
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-newsreader',
   display: 'swap',
 })
 
@@ -19,12 +26,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${GeistMono.variable} font-sans antialiased`}
+        className={`${manrope.variable} ${newsreader.variable} ${GeistMono.variable} font-sans antialiased`}
       >
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
         {children}
+        <MotionEffects />
         <Toaster position="bottom-right" theme="light" richColors />
       </body>
     </html>

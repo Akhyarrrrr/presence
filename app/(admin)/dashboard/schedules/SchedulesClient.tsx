@@ -9,6 +9,7 @@ import {
   Button,
   EmptyState,
   Field,
+  MemberAvatar,
   SelectField,
   StatTile,
   StatusBadge,
@@ -104,7 +105,7 @@ export default function SchedulesClient({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="reveal-stagger grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Surface className="p-5">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -146,14 +147,14 @@ export default function SchedulesClient({
           </div>
         </Surface>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
+        <div className="reveal-stagger grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
           <StatTile label="Members" value={members.length} icon={Users} tone="cyan" />
           <StatTile label="Assigned" value={assignments.length} icon={CheckCircle} tone="emerald" />
           <StatTile label="Open" value={unassignedCount} icon={CalendarDays} tone={unassignedCount ? 'amber' : 'zinc'} />
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[390px_minmax(0,1fr)]">
+      <div className="reveal-stagger grid gap-5 xl:grid-cols-[390px_minmax(0,1fr)]">
         <Surface className="p-5">
           <div className="mb-5">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
@@ -215,6 +216,10 @@ export default function SchedulesClient({
               Save assignment
             </Button>
           </form>
+          <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-xs leading-5 text-zinc-600">
+            Each member can have one shift per work date. Saving again updates the existing
+            assignment.
+          </div>
         </Surface>
 
         {assignments.length === 0 ? (
@@ -225,21 +230,11 @@ export default function SchedulesClient({
           />
         ) : (
           <>
-            <div className="grid gap-3 md:hidden">
+            <div className="reveal-stagger grid gap-3 md:hidden">
               {assignments.map((assignment) => (
                 <Surface key={assignment.id} className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-cyan-50 text-xs font-bold text-cyan-800 ring-1 ring-cyan-100">
-                      {assignment.members?.photo_url ? (
-                        <img
-                          src={assignment.members.photo_url}
-                          alt={assignment.members.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        assignment.members?.name?.[0]?.toUpperCase() ?? <Users size={14} />
-                      )}
-                    </div>
+                    <MemberAvatar name={assignment.members?.name} photoUrl={assignment.members?.photo_url} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-zinc-950">{assignment.members?.name}</p>
                       <p className="mt-1 text-xs text-zinc-500">{assignment.members?.employee_id}</p>
@@ -301,17 +296,7 @@ export default function SchedulesClient({
                       <tr key={assignment.id} className="transition hover:bg-cyan-50/40">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-lg bg-cyan-50 text-xs font-bold text-cyan-800 ring-1 ring-cyan-100">
-                              {assignment.members?.photo_url ? (
-                                <img
-                                  src={assignment.members.photo_url}
-                                  alt={assignment.members.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                assignment.members?.name?.[0]?.toUpperCase() ?? <Users size={14} />
-                              )}
-                            </div>
+                            <MemberAvatar name={assignment.members?.name} photoUrl={assignment.members?.photo_url} className="h-9 w-9" sizes="36px" />
                             <div>
                               <p className="text-sm font-semibold text-zinc-950">{assignment.members?.name}</p>
                               <p className="text-xs text-zinc-500">{assignment.members?.employee_id}</p>

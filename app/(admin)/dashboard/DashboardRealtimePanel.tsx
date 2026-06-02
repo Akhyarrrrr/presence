@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Activity, AlertTriangle, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
+import { MemberAvatar, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
 
 interface MemberLite {
   name: string | null
@@ -197,17 +197,7 @@ export default function DashboardRealtimePanel({ organizationId, today, initialL
                 key={log.id}
                 className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.04)]"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-xs font-bold text-cyan-800 ring-1 ring-cyan-100">
-                  {log.members?.photo_url ? (
-                    <img
-                      src={log.members.photo_url}
-                      alt={log.members?.name || 'Member'}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    log.members?.name?.[0]?.toUpperCase()
-                  )}
-                </div>
+                <MemberAvatar name={log.members?.name} photoUrl={log.members?.photo_url} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-zinc-950">{log.members?.name}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">

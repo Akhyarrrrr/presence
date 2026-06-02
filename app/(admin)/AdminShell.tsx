@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { BrandMark, StatusPill } from '@/components/ui/presence-ui'
+import { MotionPage } from '@/components/ui/motion'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -165,7 +166,7 @@ export default function AdminShell({
   )
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(8,145,178,0.08),transparent_34rem),linear-gradient(180deg,#fafafa,#f4f4f5)]">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,118,110,0.08),transparent_34rem),radial-gradient(circle_at_100%_0,rgba(14,116,144,0.06),transparent_26rem),linear-gradient(180deg,#fafafa,#f4f4f5)]">
       <aside className="fixed hidden h-full w-72 shrink-0 flex-col border-r border-zinc-200/80 bg-white/92 backdrop-blur-xl md:flex">
         {sidebar}
       </aside>
@@ -196,7 +197,7 @@ export default function AdminShell({
           <span className="min-w-0 truncate text-sm font-bold text-zinc-950">Presence Command</span>
         </div>
 
-        <header className="sticky top-0 z-10 hidden h-16 items-center justify-between border-b border-zinc-200/80 bg-white/78 px-8 backdrop-blur-xl md:flex lg:px-10">
+        <header className="sticky top-0 z-10 hidden h-16 items-center justify-between border-b border-zinc-200/80 bg-white/90 px-8 backdrop-blur-xl md:flex lg:px-10">
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-lg bg-zinc-950 text-cyan-100">
               <ActiveIcon size={17} />
@@ -225,7 +226,7 @@ export default function AdminShell({
         </header>
 
         <main id="main-content" className="mx-auto max-w-7xl p-4 md:p-8 lg:p-10">
-          {children}
+          <MotionPage routeKey={pathname}>{children}</MotionPage>
         </main>
       </div>
     </div>

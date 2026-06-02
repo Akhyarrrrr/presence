@@ -16,6 +16,7 @@ export default function DateFilter({
       <span className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Date</span>
       <input
         id="attendance-log-date"
+        name="attendance-log-date"
         type="date"
         defaultValue={selectedDate}
         max={maxDate}

@@ -203,7 +203,8 @@ export default function RegisterMemberClient({
               id="member-name"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="e.g. Akhyar"
+              placeholder="e.g. Akhyar…"
+              autoComplete="name"
               required
             />
           </Field>
@@ -213,7 +214,8 @@ export default function RegisterMemberClient({
               id="member-id"
               value={form.employee_id}
               onChange={(e) => setForm((prev) => ({ ...prev, employee_id: e.target.value }))}
-              placeholder="e.g. EMP-001"
+              placeholder="e.g. EMP-001…"
+              autoComplete="off"
               required
             />
           </Field>
@@ -234,7 +236,7 @@ export default function RegisterMemberClient({
                 {department.name}
               </option>
             ))}
-            <option value="__custom__">Custom department...</option>
+            <option value="__custom__">Custom department…</option>
           </SelectField>
 
           {form.department_id === '__custom__' && (
@@ -243,7 +245,8 @@ export default function RegisterMemberClient({
                 id="member-custom-department"
                 value={customDepartmentName}
                 onChange={(e) => setCustomDepartmentName(e.target.value)}
-                placeholder="e.g. Field Ops"
+                placeholder="e.g. Field Ops…"
+                autoComplete="off"
                 required
               />
             </Field>
@@ -255,7 +258,9 @@ export default function RegisterMemberClient({
               type="email"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-              placeholder="optional"
+              placeholder="Optional email…"
+              autoComplete="email"
+              spellCheck={false}
             />
           </Field>
 
@@ -279,7 +284,7 @@ export default function RegisterMemberClient({
             className="w-full"
           >
             <Save size={16} />
-            {saving ? 'Registering...' : 'Register Member'}
+            {saving ? 'Registering…' : 'Register Member'}
           </Button>
         </form>
         <div className="mt-5 flex flex-wrap gap-2">

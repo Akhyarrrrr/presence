@@ -24,6 +24,7 @@ import {
   StatusPill,
   Surface,
 } from '@/components/ui/presence-ui'
+import { MotionPage } from '@/components/ui/motion'
 
 export const metadata: Metadata = {
   title: 'Workforce Attendance, Verified',
@@ -96,7 +97,7 @@ const workflowItems = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <MotionPage className="min-h-screen overflow-x-hidden">
       <header className="sticky top-0 z-30 border-b border-zinc-200/80 bg-white/88 backdrop-blur-xl">
         <nav
           aria-label="Primary navigation"
@@ -128,13 +129,12 @@ export default function Home() {
               <StatusPill tone="cyan" icon={ShieldCheck}>
                 Identity-first attendance operations
               </StatusPill>
-              <h1 className="mt-6 max-w-5xl text-4xl font-bold tracking-tight text-zinc-950 md:text-6xl">
-                Presence {'\u2014'} Workforce Attendance, Verified.
+              <h1 className="mt-6 max-w-5xl font-display text-5xl font-semibold tracking-tight text-zinc-950 md:text-7xl">
+                Presence {'\u2014'} Attendance operations with real-time confidence.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
-                A modern attendance platform for teams that need kiosk check-ins, biometric
-                verification, schedule planning, live visibility, and clean reporting without making
-                employees manage accounts.
+                Built for teams that need fast kiosk check-in, reliable identity verification,
+                schedule-aware logs, and leadership-ready reporting in one operational system.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <PrimaryLink href="/attendance" className="min-h-11 px-5">
@@ -163,7 +163,7 @@ export default function Home() {
                   </div>
                   <StatusPill tone="emerald">Realtime stream ready</StatusPill>
                 </div>
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="reveal-stagger mt-6 grid gap-3 sm:grid-cols-3">
                   <StatTile label="Verified" value="38" description="Recorded check-ins" icon={CheckCircle2} tone="emerald" />
                   <StatTile label="Open" value="7" description="Awaiting arrival" icon={Gauge} tone="amber" />
                   <StatTile label="Late" value="3" description="Needs review" icon={Timer} tone="rose" />
@@ -184,7 +184,7 @@ export default function Home() {
                 </div>
               </Surface>
 
-              <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="reveal-stagger grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
                 <StatTile label="Current route" value="/attendance" description="Public kiosk without member login" icon={ScanFace} />
                 <StatTile label="Admin scope" value="Workspace" description="Protected dashboard routes" icon={LockKeyhole} tone="zinc" />
                 <StatTile label="Reports" value="PDF" description="Downloadable monthly summaries" icon={FileText} tone="amber" />
@@ -202,7 +202,7 @@ export default function Home() {
               description="Presence replaces loose sign-in workflows with a public kiosk, verified identity, duplicate-safe check-ins, and an admin workspace that stays close to daily operations."
               className="reveal-up"
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
               <Surface className="reveal-up p-5">
                 <p className="text-sm font-semibold text-zinc-950">Before</p>
                 <p className="mt-2 text-sm leading-6 text-zinc-600">
@@ -230,9 +230,9 @@ export default function Home() {
               description="The current MVP keeps members out of account management while giving admins the tools to enroll, schedule, monitor, and report."
               className="mb-8 reveal-up"
             />
-            <ol className="grid gap-4 md:grid-cols-4">
+            <ol className="reveal-stagger grid gap-4 md:grid-cols-4">
               {workflowItems.map((item, index) => (
-                <li key={item} className="reveal-up rounded-lg border border-zinc-200 bg-white p-5 shadow-[0_14px_42px_rgba(15,23,42,0.04)]">
+                <li key={item} className="reveal-scale rounded-lg border border-zinc-200 bg-white p-5 shadow-[0_14px_42px_rgba(15,23,42,0.04)]">
                   <span className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-50 text-sm font-bold text-cyan-800 ring-1 ring-cyan-100">
                     {index + 1}
                   </span>
@@ -251,7 +251,7 @@ export default function Home() {
             description="These surfaces exist in the product today, with the database and security roadmap documented separately for future hardening."
             className="mb-8 reveal-up"
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="reveal-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {featureItems.map(({ title, description, icon: Icon }) => (
               <Surface key={title} className="reveal-up p-5" hover>
                 <div className="grid h-10 w-10 place-items-center rounded-lg bg-cyan-50 text-cyan-700 ring-1 ring-cyan-100">
@@ -266,13 +266,13 @@ export default function Home() {
 
         <section className="border-y border-zinc-200/80 bg-zinc-950 py-14 text-white" aria-labelledby="roles-heading">
           <div className="mx-auto w-[calc(100vw-2rem)] max-w-7xl sm:w-full sm:px-6">
-            <div className="mb-8 max-w-3xl">
+            <div className="reveal-up mb-8 max-w-3xl">
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Roles</p>
               <h2 id="roles-heading" className="text-2xl font-bold tracking-tight md:text-3xl">
                 Clear responsibilities for every attendance workflow.
               </h2>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="reveal-stagger grid gap-4 md:grid-cols-3">
               {roleItems.map(({ title, description, icon: Icon }) => (
                 <div key={title} className="reveal-up rounded-lg border border-white/10 bg-white/[0.045] p-5">
                   <Icon size={20} className="text-cyan-200" />
@@ -294,14 +294,14 @@ export default function Home() {
               className="reveal-up"
             />
             <Surface className="reveal-up p-5">
-              <div className="grid gap-3">
+              <div className="reveal-stagger grid gap-3">
                 {[
                   'Browser clients use the Supabase anon key, not service-role secrets.',
                   'Kiosk check-in is duplicate-safe for the work date.',
                   'Server routes validate check-in and matching requests.',
                   'Legacy members.face_descriptor remains for compatibility and must not be removed in this phase.',
                 ].map((item) => (
-                  <div key={item} className="flex gap-3 rounded-lg border border-zinc-200 bg-zinc-50/80 p-3">
+                  <div key={item} className="reveal-up flex gap-3 rounded-lg border border-zinc-200 bg-zinc-50/80 p-3">
                     <ShieldCheck size={17} className="mt-0.5 shrink-0 text-emerald-700" />
                     <p className="text-sm leading-6 text-zinc-700">{item}</p>
                   </div>
@@ -336,6 +336,6 @@ export default function Home() {
           </Surface>
         </section>
       </main>
-    </div>
+    </MotionPage>
   )
 }

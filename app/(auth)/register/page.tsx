@@ -7,6 +7,7 @@ import { ArrowRight, Building2, ShieldCheck, UserCog, UserPlus, Users } from 'lu
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { BrandMark, Button, Field, StatusPill, Surface, TextInput } from '@/components/ui/presence-ui'
+import { MotionPage } from '@/components/ui/motion'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -34,15 +35,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <main id="main-content" className="grid min-h-screen place-items-center px-4 py-10">
-      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_450px] lg:items-center">
+    <main id="main-content" className="grid min-h-screen place-items-center px-4 py-8 md:py-12">
+      <MotionPage className="grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_450px] lg:items-center">
         <section className="hidden lg:block" aria-labelledby="register-intro">
           <BrandMark />
           <StatusPill tone="emerald" icon={Building2} className="mt-10">
             Workspace setup
           </StatusPill>
-          <h1 id="register-intro" className="mt-5 max-w-2xl text-4xl font-bold tracking-tight text-zinc-950">
-            Create the first owner account for attendance operations.
+          <h1 id="register-intro" className="mt-5 max-w-2xl font-display text-5xl font-semibold tracking-tight text-zinc-950">
+            Set up your workspace with a secure owner identity.
           </h1>
           <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-600">
             The current MVP signs up the owner through Supabase Auth. Organization and owner profile
@@ -73,8 +74,8 @@ export default function RegisterPage() {
             </StatusPill>
             <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Create Owner Account</h2>
             <p className="mt-2 text-sm leading-6 text-zinc-500">
-              This creates an owner login in the current MVP flow. Organization profile fields are
-              UI-only for now.
+              This creates the initial owner login in the current MVP flow. Organization profile
+              fields remain UI-only for now.
             </p>
           </div>
 
@@ -88,7 +89,7 @@ export default function RegisterPage() {
                 id="organization-name"
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="e.g. Northline Operations"
+                placeholder="e.g. Northline Operations…"
                 autoComplete="organization"
               />
             </Field>
@@ -102,7 +103,7 @@ export default function RegisterPage() {
                 id="owner-name"
                 value={ownerName}
                 onChange={(e) => setOwnerName(e.target.value)}
-                placeholder="e.g. Operations Owner"
+                placeholder="e.g. Operations Owner…"
                 autoComplete="name"
               />
             </Field>
@@ -115,6 +116,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                spellCheck={false}
               />
             </Field>
 
@@ -131,7 +133,7 @@ export default function RegisterPage() {
             </Field>
 
             <Button type="submit" disabled={loading} size="lg" className="w-full">
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? 'Creating account…' : 'Create account'}
               {!loading && <ArrowRight size={15} />}
             </Button>
           </form>
@@ -149,7 +151,7 @@ export default function RegisterPage() {
             </Link>
           </p>
         </Surface>
-      </div>
+      </MotionPage>
     </main>
   )
 }

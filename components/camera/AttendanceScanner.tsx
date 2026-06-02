@@ -29,7 +29,7 @@ import {
 } from '@/lib/liveness'
 import { formatTime } from '@/lib/utils'
 import type { AttendanceStatus, Member } from '@/types'
-import { Button, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
+import { Button, MemberAvatar, StatusBadge, StatusPill, Surface } from '@/components/ui/presence-ui'
 
 interface RecentRecord {
   member: Member
@@ -388,7 +388,7 @@ export default function AttendanceScanner() {
   const safeProgress = Math.min(challengeProgress, 3)
   const livenessLabel =
     livenessState === 'verified'
-      ? 'Liveness verified. Matching identity...'
+      ? 'Liveness verified. Matching identity…'
       : livenessState === 'failed'
         ? 'Verification timed out'
         : livenessState === 'center_calibration'
@@ -433,14 +433,34 @@ export default function AttendanceScanner() {
       complete: safeProgress >= 3,
     },
   ]
+  const stationHint =
+    status === 'idle'
+      ? 'The scanner is idle. Press Start Scanner to begin.'
+      : status === 'loading'
+        ? 'The system is preparing the face verification model.'
+        : status === 'error'
+          ? 'Camera access failed. Allow camera access, then try again.'
+          : 'The scanner is active. Follow the liveness instructions until they finish.'
 
   return (
-    <div className="mx-auto grid w-[calc(100vw-2rem)] min-w-0 grid-cols-1 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_390px]">
+    <div className="reveal-stagger mx-auto grid w-[calc(100vw-2rem)] min-w-0 grid-cols-1 gap-5 sm:w-full lg:grid-cols-[minmax(0,1fr)_390px]">
       <div className="sr-only" role="status" aria-live="polite">
         {liveStatusText}
       </div>
 
       <div className="min-w-0 space-y-4">
+        <Surface className="p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">Status station</p>
+              <p className="mt-1 text-sm font-semibold text-zinc-900">{stationHint}</p>
+            </div>
+            <StatusBadge tone={status === 'scanning' ? 'emerald' : status === 'error' ? 'rose' : 'zinc'}>
+              {scannerLabel}
+            </StatusBadge>
+          </div>
+        </Surface>
+
         <Surface className="overflow-hidden p-2">
           <div className="flex flex-col gap-3 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -534,9 +554,9 @@ export default function AttendanceScanner() {
                         <span className="block text-sm font-bold text-white sm:text-base">
                           {livenessLabel}
                         </span>
-                        <span className="text-xs font-medium text-zinc-300">{progressText}</span>
-                      </div>
-                    </div>
+                    <span className="text-xs font-medium text-zinc-300">{progressText}</span>
+                  </div>
+                </div>
                     <span className="shrink-0 text-xs font-bold text-cyan-200">
                       {safeProgress}/3
                     </span>
@@ -584,7 +604,7 @@ export default function AttendanceScanner() {
           </p>
         )}
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="reveal-stagger grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Surface className="p-4">
             <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
               <Radio size={14} />
@@ -625,11 +645,11 @@ export default function AttendanceScanner() {
             <StatusBadge tone={livenessTone}>{safeProgress}/3</StatusBadge>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="reveal-stagger grid gap-2 sm:grid-cols-3">
             {livenessSteps.map((step) => (
               <div
                 key={step.label}
-                className={`rounded-lg border px-3 py-3 transition ${
+                className={`reveal-scale rounded-lg border px-3 py-3 transition ${
                   step.complete
                     ? 'border-emerald-200 bg-emerald-50'
                     : step.active
@@ -715,17 +735,7 @@ export default function AttendanceScanner() {
                 key={`${record.member.id}-${i}`}
                 className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.04)]"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-50 text-sm font-bold text-cyan-800 ring-1 ring-cyan-100">
-                  {record.member.photo_url ? (
-                    <img
-                      src={record.member.photo_url}
-                      alt={record.member.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    record.member.name[0].toUpperCase()
-                  )}
-                </div>
+                <MemberAvatar name={record.member.name} photoUrl={record.member.photo_url} className="h-11 w-11 text-sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-zinc-950">{record.member.name}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">

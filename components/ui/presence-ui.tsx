@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { LucideIcon } from 'lucide-react'
 import { ScanFace } from 'lucide-react'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
@@ -95,7 +96,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
+        'micro-lift inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0',
         buttonVariants[variant],
         buttonSizes[size],
         className
@@ -108,14 +109,14 @@ export function Button({
 export function BrandMark({ compact = false }: Readonly<{ compact?: boolean }>) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-cyan-200 bg-white text-cyan-700 shadow-[0_10px_30px_rgba(14,116,144,0.12)]">
+      <div className="brand-mark grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-emerald-200 bg-white text-emerald-800 shadow-[0_10px_30px_rgba(15,106,94,0.14)]">
         <ScanFace size={18} />
       </div>
       {!compact && (
         <div className="min-w-0">
-          <p className="text-sm font-bold tracking-tight text-zinc-950">Presence</p>
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-            Identity Ops
+          <p className="font-display text-base font-semibold leading-none tracking-tight text-zinc-950">Presence</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+            Workforce Signals
           </p>
         </div>
       )}
@@ -176,8 +177,8 @@ export function Surface({
   return (
     <div
       className={cn(
-        'spotlight-card w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white/90 shadow-[0_18px_70px_rgba(15,23,42,0.06)]',
-        hover && 'transition duration-200 hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_22px_80px_rgba(14,116,144,0.10)]',
+        'surface-card spotlight-card reveal-up w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white/90 shadow-[0_18px_70px_rgba(15,23,42,0.06)]',
+        hover && 'hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_22px_80px_rgba(15,106,94,0.12)]',
         className
       )}
       {...props}
@@ -203,14 +204,14 @@ export function SectionHeader({
   className?: string
 }>) {
   return (
-    <div className={cn('flex flex-col gap-4 md:flex-row md:items-end md:justify-between', className)}>
+    <div className={cn('reveal-up flex flex-col gap-4 md:flex-row md:items-end md:justify-between', className)}>
       <div className="max-w-3xl">
         {eyebrow && (
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">
             {eyebrow}
           </p>
         )}
-        <h2 id={titleId} className="text-2xl font-bold tracking-tight text-zinc-950 md:text-3xl">{title}</h2>
+        <h2 id={titleId} className="font-display text-3xl font-semibold tracking-tight text-zinc-950 md:text-4xl">{title}</h2>
         {description && <div className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600 md:text-base">{description}</div>}
       </div>
       {action}
@@ -230,14 +231,14 @@ export function PageHeader({
   action?: ReactNode
 }>) {
   return (
-    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="reveal-up mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-2xl">
         {eyebrow && (
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-950 md:text-3xl">{title}</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-950 md:text-4xl">{title}</h1>
         {description && <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>}
       </div>
       {action}
@@ -263,7 +264,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        'rounded-lg border border-zinc-200 bg-white/88 p-4 shadow-[0_14px_48px_rgba(15,23,42,0.05)]',
+        'reveal-scale rounded-lg border border-zinc-200 bg-white/88 p-4 shadow-[0_14px_48px_rgba(15,23,42,0.05)]',
         className
       )}
     >
@@ -379,7 +380,7 @@ export function TextInput({
   className,
   ...props
 }: ComponentPropsWithoutRef<'input'>) {
-  return <input className={cn(fieldControlClass, className)} {...props} />
+  return <input name={props.name ?? props.id} className={cn(fieldControlClass, className)} {...props} />
 }
 
 export function SelectField({
@@ -400,7 +401,7 @@ export function SelectField({
 }) {
   return (
     <Field id={id} label={label} hint={hint} error={error} className={className}>
-      <select id={id} className={cn(fieldControlClass, selectClassName)} {...props}>
+      <select id={id} name={props.name ?? id} className={cn(fieldControlClass, selectClassName)} {...props}>
         {children}
       </select>
     </Field>
@@ -414,7 +415,7 @@ export function FilterBar({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white/88 p-3 shadow-[0_12px_42px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between',
+        'reveal-up flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white/88 p-3 shadow-[0_12px_42px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >
@@ -424,7 +425,42 @@ export function FilterBar({
 }
 
 export function Skeleton({ className }: Readonly<{ className?: string }>) {
-  return <div aria-hidden="true" className={cn('animate-pulse rounded-md bg-zinc-200/80', className)} />
+  return <div aria-hidden="true" className={cn('skeleton-shimmer rounded-md bg-zinc-200/80', className)} />
+}
+
+export function MemberAvatar({
+  name,
+  photoUrl,
+  className,
+  sizes = '48px',
+}: Readonly<{
+  name?: string | null
+  photoUrl?: string | null
+  className?: string
+  sizes?: string
+}>) {
+  const fallback = name?.trim().charAt(0).toUpperCase() || '?'
+
+  return (
+    <span
+      className={cn(
+        'relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-emerald-50 text-xs font-bold text-emerald-800 ring-1 ring-emerald-100',
+        className
+      )}
+    >
+      {photoUrl ? (
+        <Image
+          src={photoUrl}
+          alt={`${name || 'Member'} profile photo`}
+          fill
+          sizes={sizes}
+          className="object-cover"
+        />
+      ) : (
+        <span aria-hidden="true">{fallback}</span>
+      )}
+    </span>
+  )
 }
 
 export function PrimaryLink({
@@ -443,7 +479,7 @@ export function PrimaryLink({
       href={href}
       target={target}
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white transition duration-200 hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 focus:ring-offset-white',
+        'micro-lift inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 focus:ring-offset-white',
         className
       )}
     >
@@ -468,7 +504,7 @@ export function SecondaryLink({
       href={href}
       target={target}
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 transition duration-200 hover:border-cyan-200 hover:text-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 focus:ring-offset-white',
+        'micro-lift inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 hover:border-cyan-200 hover:text-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 focus:ring-offset-white',
         className
       )}
     >
