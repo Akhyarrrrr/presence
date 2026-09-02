@@ -15,11 +15,13 @@ import {
 import AttendanceScanner from '@/components/camera/AttendanceScanner'
 import {
   BrandMark,
+  PrimaryLink,
   SecondaryLink,
   StatusPill,
   Surface,
 } from '@/components/ui/presence-ui'
 import { MotionPage } from '@/components/ui/motion'
+import { isPublicKioskEnabled } from '@/lib/public-kiosk'
 
 export const metadata: Metadata = {
   title: 'Attendance Scanner',
@@ -57,6 +59,8 @@ const quickTips = [
 ]
 
 export default function AttendancePage() {
+  const kioskEnabled = isPublicKioskEnabled()
+
   return (
     <div className="min-h-screen overflow-x-hidden">
       <nav className="sticky top-0 z-20 border-b border-zinc-200/80 bg-white/88 backdrop-blur-xl">
@@ -64,8 +68,8 @@ export default function AttendancePage() {
           <BrandMark />
           <div className="flex shrink-0 items-center gap-2">
             <div className="hidden md:block">
-              <StatusPill tone="emerald" icon={ShieldCheck}>
-                Server-verified matching
+              <StatusPill tone={kioskEnabled ? 'emerald' : 'amber'} icon={ShieldCheck}>
+                {kioskEnabled ? 'Server-side matching' : 'Read-only portfolio demo'}
               </StatusPill>
             </div>
             <SecondaryLink href="/" className="hidden px-3 py-2 sm:inline-flex">
@@ -88,14 +92,19 @@ export default function AttendancePage() {
               Kiosk mode
             </StatusPill>
             <p className="mt-4 text-sm font-semibold text-cyan-900">
-              Employee check-in station. No login required.
+              {kioskEnabled
+                ? 'Employee check-in station. No login required.'
+                : 'Recruiter walkthrough. Live attendance writes are disabled.'}
             </p>
             <h1 className="mt-2 max-w-4xl font-display text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">
-              Stand in frame. Prove liveness. Check in with confidence.
+              {kioskEnabled
+                ? 'Stand in frame. Complete the liveness step. Check in.'
+                : 'Explore the kiosk workflow without exposing biometric data.'}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-600 md:text-base">
-              Presence verifies a live person, matches the enrolled identity through the server, and
-              records today&apos;s attendance result once the check-in is accepted.
+              Presence uses a demo-grade head-movement gate, server-side vector matching, and
+              duplicate-safe attendance writes. Portfolio deployments remain read-only unless an
+              isolated demo environment explicitly enables the kiosk.
             </p>
           </div>
 
@@ -194,7 +203,30 @@ export default function AttendancePage() {
           </div>
         </section>
 
-        <AttendanceScanner />
+        {kioskEnabled ? (
+          <AttendanceScanner />
+        ) : (
+          <Surface className="mx-auto w-[calc(100vw-2rem)] p-6 sm:w-full md:p-8">
+            <StatusPill tone="amber" icon={ShieldCheck}>
+              Safe demo boundary
+            </StatusPill>
+            <h2 className="mt-4 max-w-3xl font-display text-2xl font-semibold tracking-tight text-zinc-950 md:text-3xl">
+              Camera matching and attendance writes are intentionally unavailable here.
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600 md:text-base">
+              The repository documents the complete enrollment, liveness, pgvector matching,
+              shift-classification, and reporting flow. Enable the live kiosk only with isolated
+              demo data and an explicit server environment flag.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <PrimaryLink href="https://github.com/Akhyarrrrr/presence" target="_blank">
+                Review source code
+                <ArrowRight size={16} />
+              </PrimaryLink>
+              <SecondaryLink href="/">Back to case study</SecondaryLink>
+            </div>
+          </Surface>
+        )}
         </MotionPage>
       </main>
     </div>

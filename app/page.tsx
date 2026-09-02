@@ -70,7 +70,7 @@ const featureItems = [
     icon: FileText,
   },
   {
-    title: "Secure server matching",
+    title: "Server-side matching",
     description:
       "Kiosk matching uses server routes and RPCs instead of broad descriptor reads.",
     icon: ShieldCheck,
@@ -101,7 +101,7 @@ const roleItems = [
 const workflowItems = [
   "Admin enrolls the member profile and face descriptor.",
   "Member opens the public attendance kiosk.",
-  "The kiosk verifies liveness, matches identity, and records check-in.",
+  "The kiosk runs a demo-grade liveness step, requests server matching, and records check-in when the live kiosk is enabled.",
   "Dashboard, logs, schedules, and reports give HR operational visibility.",
 ];
 
@@ -137,19 +137,19 @@ export default function Home() {
           <div className="mx-auto grid w-[calc(100vw-2rem)] max-w-7xl gap-10 py-12 sm:w-full sm:px-6 lg:py-16">
             <div className="max-w-4xl">
               <StatusPill tone="cyan" icon={ShieldCheck}>
-                Identity-first attendance operations
+                Recruiter-ready product case study
               </StatusPill>
               <h1 className="mt-6 max-w-5xl font-display text-5xl font-semibold tracking-tight text-zinc-950 md:text-7xl">
                 Attendance operations with real-time confidence.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
-                Built for teams that need fast kiosk check-in, reliable identity
-                verification, schedule-aware logs, and leadership-ready
-                reporting in one operational system.
+                A full-stack attendance system spanning camera workflows,
+                server-side vector matching, schedule-aware logs, realtime
+                monitoring, and reporting. The public portfolio demo is read-only.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <PrimaryLink href="/attendance" className="min-h-11 px-5">
-                  Start Attendance Kiosk
+                  Explore Kiosk Flow
                   <ArrowRight size={16} />
                 </PrimaryLink>
                 <SecondaryLink href="/login" className="min-h-11 px-5">
@@ -323,8 +323,8 @@ export default function Home() {
           <SectionHeader
             eyebrow="Core features"
             titleId="features-heading"
-            title="Built for real attendance operations, not camera demos."
-            description="These surfaces exist in the product today, with the database and security roadmap documented separately for future hardening."
+            title="Built as an end-to-end attendance system, not a camera-only demo."
+            description="These surfaces exist in the repository today. The head-movement step remains a demo-grade liveness gate, and the public portfolio deployment keeps sensitive kiosk operations disabled."
             className="mb-8 reveal-up"
           />
           <div className="reveal-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -385,8 +385,8 @@ export default function Home() {
             <SectionHeader
               eyebrow="Security / Trust"
               titleId="trust-heading"
-              title="Designed around biometric caution."
-              description="Presence separates current behavior from proposed work in its documentation, keeps sensitive matching behind server paths, and preserves compatibility while security hardening continues."
+              title="Designed around explicit biometric boundaries."
+              description="Presence keeps matching behind server routes, disables sensitive public kiosk operations by default, and documents where the current liveness approach stops short of anti-spoof protection."
               className="reveal-up"
             />
             <Surface className="reveal-up p-5">
@@ -395,7 +395,7 @@ export default function Home() {
                   "Browser clients use the Supabase anon key, not service-role secrets.",
                   "Kiosk check-in is duplicate-safe for the work date.",
                   "Server routes validate check-in and matching requests.",
-                  "Legacy members.face_descriptor remains for compatibility and must not be removed in this phase.",
+                  "Head-movement liveness is a demo-grade interaction gate, not an anti-spoof guarantee.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -418,23 +418,25 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
                 <StatusPill tone="cyan" icon={ClipboardList}>
-                  Ready for attendance day
+                  Recruiter walkthrough ready
                 </StatusPill>
                 <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950 md:text-3xl">
-                  Open the kiosk, or sign into the workspace to manage
-                  operations.
+                  Review the safe kiosk flow or inspect the implementation.
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-                  Employees check in from the kiosk. Owners and admins use the
-                  workspace for roster, shift, schedule, log, and report
-                  workflows.
+                  The public deployment avoids exposing biometric data or live
+                  attendance writes. The repository documents the complete
+                  roster, shift, schedule, log, and reporting architecture.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <PrimaryLink href="/attendance">
-                  Start Attendance Kiosk
+                  Explore Kiosk Flow
                   <ArrowRight size={16} />
                 </PrimaryLink>
+                <SecondaryLink href="https://github.com/Akhyarrrrr/presence" target="_blank">
+                  Review Source Code
+                </SecondaryLink>
                 <SecondaryLink href="/login">Workspace Login</SecondaryLink>
                 <SecondaryLink href="/register">
                   Create Organization

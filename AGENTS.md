@@ -6,11 +6,11 @@ This file is the working agreement for future AI agents and contributors in this
 
 Presence is a Next.js App Router attendance system with browser-based face enrollment and a public attendance kiosk. The current implementation uses Supabase Auth, Database, Storage, `face-api.js`, TensorFlow.js model assets in `public/models`, Recharts, Sonner, Lucide icons, and Tailwind CSS.
 
-The PRD direction is broader than the current MVP: server-side pgvector matching, liveness detection, shift scheduling, attendance classification, realtime monitoring, and PDF reports. When documenting or implementing future work, clearly separate what exists today from what is proposed.
+The current portfolio build includes server-side pgvector matching, demo-grade head-movement liveness gating, shift scheduling, attendance classification, realtime monitoring, and PDF reports. Keep security boundaries explicit: the liveness flow is not a production biometric anti-spoofing guarantee.
 
 ## Current Architecture
 
-- `app/page.tsx` redirects authenticated users to `/dashboard` and unauthenticated users to `/attendance`.
+- `app/page.tsx` is the public recruiter-facing product overview; `/attendance` defaults to a read-only walkthrough unless `PRESENCE_PUBLIC_KIOSK_ENABLED=true`.
 - `app/attendance/page.tsx` is the public kiosk route.
 - `app/(auth)` contains login and register screens backed by Supabase Auth.
 - `app/(admin)` contains protected dashboard, members, member enrollment, and logs routes.
@@ -18,7 +18,7 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 - `lib/supabase/client.ts` creates the browser Supabase client.
 - `lib/supabase/server.ts` creates the Server Component Supabase client.
 - `lib/supabase/organization.ts` prepares current admin, current organization, and organization-scoped query helpers.
-- `lib/face-api.ts` owns model loading, descriptor extraction, client-side matching, and canvas drawing.
+- `lib/face-api.ts` owns browser model loading, descriptor extraction, liveness guidance, and canvas drawing; matching is handled by server routes.
 - `components/camera` owns camera-driven UI.
 - `components/ui/presence-ui.tsx` contains the current shared UI primitives.
 - `types/index.ts` contains the current app-level TypeScript interfaces.
@@ -28,7 +28,7 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 
 - Do not blur existing behavior with planned behavior. Label proposed features, tables, and APIs as proposed until they exist.
 - Do not expose Supabase service role keys to the browser or any `NEXT_PUBLIC_*` variable.
-- Do not fetch every face descriptor into the browser in new work. The current scanner does this as legacy MVP behavior only.
+- Do not fetch face descriptors into the browser. The current attendance flow sends a single descriptor to the server-side matcher.
 - Do not add biometric storage or matching features without documenting RLS, data minimization, and failure states.
 - Do not implement large refactors when the user asked for documentation, review, or planning only.
 - Do not replace the existing visual language with generic landing-page or AI-template UI.
@@ -41,7 +41,7 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 - Keep route-specific data loading close to the route until there is real reuse.
 - Keep shared UI in `components/ui` and domain components in domain folders such as `components/camera`.
 - Keep Supabase client creation inside `lib/supabase`. Do not instantiate Supabase clients ad hoc throughout the app.
-- Keep face-recognition utilities in `lib/face-api.ts` until a worker or server-side matching module is introduced.
+- Keep browser face-detection and liveness utilities in `lib/face-api.ts`; keep matching and persistence behind server routes.
 - Use `@/` imports consistently.
 - Preserve existing formatting style: no semicolons, single quotes, concise React components.
 - Use existing dependencies before adding new ones. Add a dependency only when it clearly reduces product or security risk.
@@ -68,7 +68,7 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 - Treat `members.face_descriptor` as legacy. Future work should move descriptors to `member_face_descriptors.descriptor vector(128)` and query through server-side RPC or route handlers.
 - Do not perform full-table descriptor reads in client code for new attendance or enrollment flows.
 - Phase 1 adds `organizations`, `admin_users`, and nullable/defaulted `organization_id` columns. Do not make those fields non-null or strict in RLS until existing Supabase data and kiosk compatibility are verified.
-- Phase 2 scopes admin dashboard, member, and attendance-log views to the current admin organization. Public kiosk scanner queries remain intentionally unscoped until the server-side attendance path exists.
+- Admin dashboard, member, and attendance-log views are scoped to the current organization. Public kiosk bootstrap and writes remain server-controlled and are disabled by default in portfolio deployments.
 - Phase 3 adds shifts and shift assignments for admin planning. Do not wire shift classification into kiosk attendance until that phase is explicitly requested.
 
 ## Attendance And Biometric Rules
@@ -76,8 +76,8 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 - Enrollment creates a member profile, a face descriptor, and optionally a photo preview.
 - Attendance must be idempotent per member per work date.
 - Current duplicate prevention is the `attendance_member_date_unique` index. Preserve equivalent protection after schema changes.
-- Planned attendance must run liveness before accepting check-in.
-- Planned matching must happen server-side using pgvector.
+- Attendance runs demo-grade liveness gating before matching and check-in.
+- Matching happens server-side using pgvector.
 - Store only what is needed for auditability. Avoid storing raw camera frames unless a future requirement explicitly calls for it.
 - Record enough matching metadata for audit and troubleshooting: distance, confidence, model version, liveness result, shift, and status.
 
@@ -156,7 +156,7 @@ The PRD direction is broader than the current MVP: server-side pgvector matching
 
 ## Areas To Treat Carefully
 
-- The public attendance scanner currently fetches active members and descriptors in the browser. This is a known security and scalability gap, not a pattern to copy.
+- The public attendance scanner does not receive stored face descriptors. Portfolio deployments keep scanner bootstrap, matching, and check-in disabled unless an operator explicitly enables the kiosk.
 - Member deletion currently deletes attendance history through cascade. Avoid building workflows that encourage destructive deletion.
 - Admin pages now use the Phase 1 organization/admin foundation, but public kiosk attendance still uses the original MVP flow.
 - Departments are still global in the current schema. Decide whether to scope them before building multi-tenant department features.

@@ -1,14 +1,18 @@
 # Presence
 
-Presence is a workforce attendance platform built with Next.js and Supabase. It provides a public kiosk check-in experience with face detection + liveness verification, plus an admin control panel for member management, shift scheduling, attendance analytics, realtime monitoring, and PDF reporting.
+Presence is a workforce attendance portfolio project built with Next.js and Supabase. It combines a camera-based kiosk, demo-grade head-movement liveness gating, server-side pgvector matching, shift-aware attendance, realtime monitoring, and PDF reporting.
 
-UI references:
+The public portfolio deployment is read-only by default. Sensitive kiosk bootstrap, matching, and attendance writes require `PRESENCE_PUBLIC_KIOSK_ENABLED=true` and should only be enabled against isolated demo data.
 
-- `UI_DESIGN_SYSTEM.md`
-- `UI_ANIMATION_SPECS.md`
-- `UI_CHANGELOG.md`
+> Security boundary: head movement is an interaction gate, not an anti-spoof guarantee. The project does not claim production-grade biometric security.
 
-The project is intentionally phased: current production logic emphasizes secure server-side matching and server-side attendance writes while preserving operational reliability.
+## Recruiter Walkthrough
+
+1. Open the landing page for the product scope and operational workflow.
+2. Open `/attendance` to review the safe kiosk walkthrough.
+3. Review `app/api/face/match`, `app/api/attendance/check-in`, and `supabase/schema.sql` for the server and database boundaries.
+4. Review the dashboard routes for members, shifts, schedules, realtime monitoring, logs, and reports.
+5. Run `npm run lint` and `npm run build` to verify the checked-in implementation.
 
 ## Project Overview
 
@@ -86,6 +90,7 @@ Security model:
 - Browser uses anon key only
 - Sensitive reads/writes flow through server routes
 - Database access is restricted via RLS + security-definer RPCs for kiosk operations
+- Public portfolio deployments deny kiosk data access and writes unless explicitly enabled
 
 ## Tech Stack
 
@@ -120,6 +125,7 @@ cp .env.local.example .env.local
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+PRESENCE_PUBLIC_KIOSK_ENABLED=false
 ```
 
 4. Start dev server:
@@ -185,7 +191,7 @@ The kiosk now relies on secure server matching endpoints and should not fetch de
 
 ## Screenshots
 
-Add product screenshots here:
+Recruiter-facing screenshots:
 
 - `docs/screenshots/kiosk-scanner.png` (kiosk scanner)
 - `docs/screenshots/dashboard-overview.png` (dashboard summary)
@@ -193,15 +199,7 @@ Add product screenshots here:
 - `docs/screenshots/schedules.png` (schedule assignment)
 - `docs/screenshots/reports-pdf.png` (reports module)
 
-Example markdown placeholders:
-
-```md
-![Kiosk Scanner](docs/screenshots/kiosk-scanner.png)
-![Dashboard Overview](docs/screenshots/dashboard-overview.png)
-![Shift Management](docs/screenshots/shifts.png)
-![Schedules](docs/screenshots/schedules.png)
-![Reports](docs/screenshots/reports-pdf.png)
-```
+Screenshots are captured from isolated demo data. Do not include names, email addresses, face descriptors, or other personal data.
 
 ## Scripts
 
@@ -216,6 +214,7 @@ npm run start
 
 ## Future Roadmap
 
+- Bind liveness evidence, descriptor matching, and check-in into a replay-resistant server flow
 - Remove legacy `members.face_descriptor` after final migration/backfill verification
 - Tighten and simplify legacy RPC surface after stabilization
 - Add richer audit metadata (model version, matching telemetry)

@@ -1,5 +1,9 @@
 # Presence API Contract
 
+> Current status, Aug 2026: the implemented kiosk surface is `GET /api/attendance/bootstrap`, `POST /api/face/match`, and `POST /api/attendance/check-in`, backed by the Phase 10/11 secure RPCs. Earlier "Existing APIs" sections below document historical MVP phases and are not authoritative for the current browser data flow. Public portfolio deployments return `403` from kiosk endpoints unless `PRESENCE_PUBLIC_KIOSK_ENABLED=true`.
+
+> Security boundary: the current browser head-movement state machine is a demo-grade interaction gate. A client-supplied liveness flag is not an anti-spoof guarantee; replay-resistant challenge verification remains planned hardening.
+
 This document describes the current API surface and the planned API surface for the PRD direction. The current app does not define local Next.js route handlers under `app/api`. Existing data access happens through Supabase Auth, Database, and Storage clients from Server Components and Client Components.
 
 Current API contracts below are therefore documented as Supabase client contracts used by the app. Planned contracts are proposed Next.js route handlers and Supabase Realtime channels.

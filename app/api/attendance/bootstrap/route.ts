@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isPublicKioskEnabled } from '@/lib/public-kiosk'
 
 type RosterRow = {
   id: string
@@ -14,6 +15,13 @@ type CheckedInRow = {
 }
 
 export async function GET() {
+  if (!isPublicKioskEnabled()) {
+    return NextResponse.json(
+      { error: 'Public kiosk is disabled in this portfolio deployment' },
+      { status: 403 }
+    )
+  }
+
   const supabase = await createClient()
 
   const [{ data: members, error: membersError }, { data: checkedIn, error: checkedInError }] =

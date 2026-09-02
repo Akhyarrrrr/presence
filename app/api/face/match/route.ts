@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isPublicKioskEnabled } from '@/lib/public-kiosk'
 const DESCRIPTOR_LENGTH = 128
 const DEFAULT_MATCH_THRESHOLD = 0.55
 
@@ -33,6 +34,13 @@ function parseThreshold(value: unknown): number {
 }
 
 export async function POST(request: Request) {
+  if (!isPublicKioskEnabled()) {
+    return NextResponse.json(
+      { error: 'Public kiosk is disabled in this portfolio deployment' },
+      { status: 403 }
+    )
+  }
+
   let body: MatchRequestBody
 
   try {

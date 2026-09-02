@@ -1,5 +1,7 @@
 # Presence Database Schema
 
+> Current status, Aug 2026: `supabase/schema.sql` plus the Phase 10/11 sections at the end of this document describe the active server-RPC path. Earlier sections retain migration history and proposed shapes for compatibility context. Portfolio deployments keep public kiosk access disabled unless explicitly enabled against isolated demo data.
+
 This document describes the current checked-in Supabase schema and the proposed schema required by the PRD. The current schema is based on `supabase/schema.sql` and the application code. I did not introspect a live Supabase project, so any production-only changes must be verified against Supabase before migration.
 
 Phase 1 organization/admin foundation has been added to `supabase/schema.sql` as an additive, idempotent section. Phase 2 wires admin pages to the current organization context. Existing public kiosk attendance behavior is intentionally preserved.

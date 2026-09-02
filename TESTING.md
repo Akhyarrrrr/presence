@@ -1,5 +1,11 @@
 # Presence Manual Testing Checklist
 
+## Portfolio Safety Gate
+
+- With `PRESENCE_PUBLIC_KIOSK_ENABLED` missing or `false`, `/attendance` renders the read-only recruiter walkthrough.
+- `GET /api/attendance/bootstrap`, `POST /api/face/match`, and `POST /api/attendance/check-in` must return `403`.
+- Enable the flag only against isolated demo data before running live kiosk checks.
+
 Use this checklist for demo-day and release verification. Mark each item as `PASS` or `FAIL`.
 
 | Area | Test Case | Expected Result | PASS/FAIL |

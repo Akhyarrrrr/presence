@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { PostgrestError } from '@supabase/supabase-js'
+import { isPublicKioskEnabled } from '@/lib/public-kiosk'
 
 type CheckInBody = {
   member_id?: unknown
@@ -47,6 +48,13 @@ function formatRpcError(error: PostgrestError) {
 }
 
 export async function POST(request: Request) {
+  if (!isPublicKioskEnabled()) {
+    return NextResponse.json(
+      { error: 'Public kiosk is disabled in this portfolio deployment' },
+      { status: 403 }
+    )
+  }
+
   let body: CheckInBody
 
   try {
