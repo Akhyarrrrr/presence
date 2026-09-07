@@ -17,3 +17,5 @@ yarn-error.log*
 
 .codex/
 .cursor/
+.vercel/
+supabase/.temp/
