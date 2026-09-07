@@ -4,6 +4,8 @@ export type AttendanceStatus = 'on_time' | 'late' | 'very_late' | 'no_shift'
 export interface Organization {
   id: string
   name: string
+  slug: string
+  owner_name?: string | null
   timezone: string
   created_at: string
   updated_at: string
@@ -19,6 +21,16 @@ export interface AdminUser {
   organizations?: Organization | null
 }
 
+export interface AdminInvitation {
+  id: string
+  organization_id: string
+  email: string
+  role: 'admin' | 'viewer'
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+}
+
 export interface Department {
   id: string
   name: string
@@ -32,7 +44,7 @@ export interface Member {
   department_id: string | null
   email: string | null
   photo_url: string | null
-  face_descriptor: number[]
+  face_descriptor: number[] | null
   is_active: boolean
   created_at: string
   updated_at: string
@@ -47,6 +59,9 @@ export interface AttendanceLog {
   status?: AttendanceStatus | null
   late_minutes?: number | null
   check_in_at: string
+  check_out_at?: string | null
+  verification_method?: string | null
+  correction_reason?: string | null
   confidence: number
   date: string
   created_at: string

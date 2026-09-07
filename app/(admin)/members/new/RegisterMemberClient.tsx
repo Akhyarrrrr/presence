@@ -27,7 +27,7 @@ export default function RegisterMemberClient({
   organizationId,
 }: Readonly<{ departments: Department[]; organizationId: string }>) {
   const router = useRouter()
-  const [form, setForm] = useState({ name: '', employee_id: '', department_id: '', email: '' })
+  const [form, setForm] = useState({ name: '', employee_id: '', department_id: '', email: '', badge: '', pin: '' })
   const [customDepartmentName, setCustomDepartmentName] = useState('')
   const [faceData, setFaceData] = useState<{ descriptor: number[]; photoDataUrl: string } | null>(null)
   const [saving, setSaving] = useState(false)
@@ -144,6 +144,25 @@ export default function RegisterMemberClient({
       toast.error('Face enrollment could not be completed. Please try again.')
       setSaving(false)
       return
+    }
+
+    if ((form.badge.trim() && !form.pin.trim()) || (!form.badge.trim() && form.pin.trim())) {
+      toast.error('Enter both badge code and PIN, or leave both empty.')
+      setSaving(false)
+      return
+    }
+
+    if (form.badge.trim() && form.pin.trim()) {
+      const { error: credentialError } = await supabase.rpc('set_member_attendance_credentials', {
+        member_id: memberRow.id,
+        badge: form.badge.trim(),
+        pin: form.pin.trim(),
+      })
+      if (credentialError) {
+        toast.error('Member saved, but fallback credentials could not be configured.')
+        setSaving(false)
+        return
+      }
     }
 
     toast.success(`${form.name} registered successfully`)
@@ -263,6 +282,29 @@ export default function RegisterMemberClient({
               spellCheck={false}
             />
           </Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field id="member-badge" label="Badge code" hint="Optional camera fallback.">
+              <TextInput
+                id="member-badge"
+                value={form.badge}
+                onChange={(e) => setForm((prev) => ({ ...prev, badge: e.target.value }))}
+                autoComplete="off"
+              />
+            </Field>
+            <Field id="member-pin" label="Attendance PIN" hint="Optional, minimum 4 digits.">
+              <TextInput
+                id="member-pin"
+                type="password"
+                inputMode="numeric"
+                minLength={4}
+                pattern="[0-9]{4,}"
+                value={form.pin}
+                onChange={(e) => setForm((prev) => ({ ...prev, pin: e.target.value }))}
+                autoComplete="new-password"
+              />
+            </Field>
+          </div>
 
           {!faceData && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">

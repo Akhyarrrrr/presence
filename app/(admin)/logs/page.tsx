@@ -4,6 +4,7 @@ import { getCurrentAdminContext } from '@/lib/supabase/organization'
 import { formatDate, formatTime } from '@/lib/utils'
 import { EmptyState, MemberAvatar, PageHeader, StatTile, StatusBadge, Surface } from '@/components/ui/presence-ui'
 import DateFilter from './DateFilter'
+import CorrectionAction from './CorrectionAction'
 
 type LogStatusKey = 'on_time' | 'late' | 'very_late' | 'no_shift' | 'present'
 
@@ -146,6 +147,7 @@ export default async function LogsPage({
                         {log.members?.departments?.name || 'No department'}
                       </p>
                     </div>
+                    <CorrectionAction logId={log.id} checkIn={log.check_in_at} checkOut={log.check_out_at} status={log.status} />
                   </div>
                 </Surface>
               )
@@ -165,6 +167,7 @@ export default async function LogsPage({
                   <th scope="col" className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Check-in Time</th>
                   <th scope="col" className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Confidence</th>
                   <th scope="col" className="px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Status</th>
+                  <th scope="col" className="px-5 py-3 text-right text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200/70 bg-white">
@@ -182,6 +185,7 @@ export default async function LogsPage({
                           </div>
                         </div>
                       </td>
+                      <td className="px-5 py-4 text-right"><CorrectionAction logId={log.id} checkIn={log.check_in_at} checkOut={log.check_out_at} status={log.status} /></td>
                       <td className="hidden px-5 py-4 sm:table-cell">
                         <span className="text-sm font-medium text-zinc-600">{log.members?.departments?.name || '-'}</span>
                       </td>

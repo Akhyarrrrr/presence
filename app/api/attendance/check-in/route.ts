@@ -8,6 +8,7 @@ type CheckInBody = {
   confidence?: unknown
   distance?: unknown
   liveness_verified?: unknown
+  organization?: unknown
 }
 type CheckInRpcRow = {
   status: 'on_time' | 'late' | 'very_late' | 'no_shift'
@@ -26,16 +27,6 @@ function isFiniteNumber(value: unknown): value is number {
 
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
-function isRpcResolutionError(error: PostgrestError | null) {
-  if (!error) return false
-  const message = `${error.message ?? ''} ${error.details ?? ''}`.toLowerCase()
-  return (
-    error.code === 'PGRST202' ||
-    message.includes('could not find the function') ||
-    message.includes('function public.secure_attendance_check_in')
-  )
 }
 
 function formatRpcError(error: PostgrestError) {
@@ -75,22 +66,18 @@ export async function POST(request: Request) {
   if (body.liveness_verified !== true) {
     return NextResponse.json({ error: 'liveness verification is required' }, { status: 400 })
   }
+  if (typeof body.organization !== 'string' || !body.organization.trim()) {
+    return NextResponse.json({ error: 'organization is required' }, { status: 400 })
+  }
 
   const supabase = await createClient()
 
-  let rpcResult: CheckInRpcPayload = await supabase.rpc('secure_attendance_check_in', {
+  const rpcResult: CheckInRpcPayload = await supabase.rpc('secure_attendance_check_in_scoped', {
     p_member_id: body.member_id,
     p_confidence: body.confidence,
     p_liveness_verified: true,
+    organization_slug: body.organization.trim(),
   })
-
-  if (isRpcResolutionError(rpcResult.error)) {
-    rpcResult = await supabase.rpc('secure_attendance_check_in', {
-      member_id: body.member_id,
-      confidence: body.confidence,
-      liveness_verified: true,
-    })
-  }
 
   const { data, error } = rpcResult
 

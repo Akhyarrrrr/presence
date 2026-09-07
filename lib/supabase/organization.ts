@@ -30,7 +30,7 @@ export async function getCurrentAdminContext(
   const { data, error } = await supabase
     .from('admin_users')
     .select(
-      'id, user_id, organization_id, role, created_at, updated_at, organizations(id, name, timezone, created_at, updated_at)'
+      'id, user_id, organization_id, role, created_at, updated_at, organizations(id, name, slug, owner_name, timezone, created_at, updated_at)'
     )
     .eq('user_id', user.id)
     .maybeSingle()

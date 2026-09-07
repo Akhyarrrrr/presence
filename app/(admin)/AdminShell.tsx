@@ -16,6 +16,7 @@ import {
   ScanFace,
   Timer,
   Users,
+  UserCog,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -32,12 +33,14 @@ const navItems = [
   { href: '/dashboard/schedules', label: 'Schedules', helper: 'Daily planning', icon: CalendarDays },
   { href: '/dashboard/reports', label: 'Reports', helper: 'Monthly export', icon: FileText },
   { href: '/logs', label: 'Attendance Logs', helper: 'Audit trail', icon: ClipboardList },
+  { href: '/dashboard/team', label: 'Admin Access', helper: 'Invites and roles', icon: UserCog },
 ]
 
 export default function AdminShell({
   children,
   user,
-}: Readonly<{ children: React.ReactNode; user: User }>) {
+  organizationSlug,
+}: Readonly<{ children: React.ReactNode; user: User; organizationSlug: string }>) {
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -138,7 +141,7 @@ export default function AdminShell({
         </div>
 
         <Link
-          href="/attendance"
+          href={`/attendance?organization=${encodeURIComponent(organizationSlug)}`}
           target="_blank"
           className="mt-3 flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm font-semibold text-zinc-700 shadow-[0_12px_36px_rgba(15,23,42,0.04)] transition duration-200 hover:border-cyan-200 hover:text-cyan-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2"
         >

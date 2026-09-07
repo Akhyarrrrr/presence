@@ -14,7 +14,7 @@ type CheckedInRow = {
   member_id: string
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!isPublicKioskEnabled()) {
     return NextResponse.json(
       { error: 'Public kiosk is disabled in this portfolio deployment' },
@@ -23,11 +23,13 @@ export async function GET() {
   }
 
   const supabase = await createClient()
+  const organization = new URL(request.url).searchParams.get('organization')?.trim()
+  if (!organization) return NextResponse.json({ error: 'Organization code is required' }, { status: 400 })
 
   const [{ data: members, error: membersError }, { data: checkedIn, error: checkedInError }] =
     await Promise.all([
-      supabase.rpc('kiosk_active_members'),
-      supabase.rpc('kiosk_today_checked_in'),
+      supabase.rpc('kiosk_active_members_scoped', { organization_slug: organization }),
+      supabase.rpc('kiosk_today_attendance_scoped', { organization_slug: organization }),
     ])
 
   if (membersError || checkedInError) {

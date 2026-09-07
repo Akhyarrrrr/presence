@@ -13,6 +13,7 @@ import {
   Users,
 } from 'lucide-react'
 import AttendanceScanner from '@/components/camera/AttendanceScanner'
+import FallbackAttendance from '@/components/camera/FallbackAttendance'
 import {
   BrandMark,
   PrimaryLink,
@@ -58,8 +59,9 @@ const quickTips = [
   'Wait for the success notification before leaving the kiosk.',
 ]
 
-export default function AttendancePage() {
+export default async function AttendancePage({ searchParams }: { searchParams: Promise<{ organization?: string }> }) {
   const kioskEnabled = isPublicKioskEnabled()
+  const { organization = '' } = await searchParams
 
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -203,8 +205,10 @@ export default function AttendancePage() {
           </div>
         </section>
 
-        {kioskEnabled ? (
-          <AttendanceScanner />
+        {kioskEnabled && organization ? (
+          <><AttendanceScanner organizationSlug={organization} /><FallbackAttendance organization={organization} /></>
+        ) : kioskEnabled ? (
+          <Surface className="mx-auto w-[calc(100vw-2rem)] p-6 sm:w-full"><h2 className="text-2xl font-semibold text-zinc-950">Organization code required</h2><p className="mt-2 text-zinc-600">Open the kiosk link from your organization dashboard so attendance remains scoped to one workspace.</p></Surface>
         ) : (
           <Surface className="mx-auto w-[calc(100vw-2rem)] p-6 sm:w-full md:p-8">
             <StatusPill tone="amber" icon={ShieldCheck}>

@@ -16,13 +16,25 @@ export default function RegisterPage() {
   const [organizationName, setOrganizationName] = useState('')
   const [ownerName, setOwnerName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [confirmationEmail, setConfirmationEmail] = useState('')
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          organization_name: organizationName.trim(),
+          owner_name: ownerName.trim(),
+          full_name: ownerName.trim(),
+        },
+        emailRedirectTo: `${window.location.origin}/login?confirmed=1`,
+      },
+    })
 
     if (error) {
       toast.error(error.message)
@@ -30,8 +42,18 @@ export default function RegisterPage() {
       return
     }
 
-    toast.success('Account created. Check your email to confirm.')
-    router.push('/login')
+    if (!data.session) {
+      setConfirmationEmail(email)
+      toast.success('Account created. Check your email to confirm.')
+    } else {
+      toast.success('Organization created.')
+      router.push('/dashboard')
+      router.refresh()
+    }
+  }
+
+  if (confirmationEmail) {
+    return <main className="grid min-h-screen place-items-center px-4"><Surface className="max-w-md p-7" role="status"><BrandMark /><h1 className="mt-6 text-2xl font-bold text-zinc-950">Confirm your email</h1><p className="mt-3 text-sm leading-6 text-zinc-600">A confirmation link was sent to <strong>{confirmationEmail}</strong>. Your organization will be ready after confirmation.</p><Link href="/login" className="mt-6 inline-block font-semibold text-cyan-700">Back to sign in</Link></Surface></main>
   }
 
   return (
@@ -53,7 +75,7 @@ export default function RegisterPage() {
             {[
               { title: 'Owner account', detail: 'First admin sign-in', icon: UserCog },
               { title: 'Managed members', detail: 'Employees do not self-register', icon: Users },
-              { title: 'Future invites', detail: 'Approval flow is planned', icon: ShieldCheck },
+              { title: 'Admin invites', detail: 'Owner-controlled access', icon: ShieldCheck },
             ].map(({ title, detail, icon: Icon }) => (
               <div key={title} className="rounded-lg border border-zinc-200 bg-white/88 p-4 shadow-[0_14px_44px_rgba(15,23,42,0.05)]">
                 <Icon size={18} className="text-cyan-700" />
@@ -75,7 +97,7 @@ export default function RegisterPage() {
             <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-950">Create Owner Account</h2>
             <p className="mt-2 text-sm leading-6 text-zinc-500">
               This creates the initial owner login in the current MVP flow. Organization profile
-              fields remain UI-only for now.
+              fields create an isolated organization and owner profile.
             </p>
           </div>
 
@@ -83,7 +105,7 @@ export default function RegisterPage() {
             <Field
               id="organization-name"
               label="Organization Name"
-              hint="UI-only in the current MVP registration flow."
+              hint="Creates your private organization workspace."
             >
               <TextInput
                 id="organization-name"
@@ -91,13 +113,14 @@ export default function RegisterPage() {
                 onChange={(e) => setOrganizationName(e.target.value)}
                 placeholder="e.g. Northline Operations…"
                 autoComplete="organization"
+                required
               />
             </Field>
 
             <Field
               id="owner-name"
               label="Owner Name"
-              hint="UI-only today; future profile persistence can attach this to the owner record."
+              hint="Shown to other administrators in your organization."
             >
               <TextInput
                 id="owner-name"
@@ -105,6 +128,7 @@ export default function RegisterPage() {
                 onChange={(e) => setOwnerName(e.target.value)}
                 placeholder="e.g. Operations Owner…"
                 autoComplete="name"
+                required
               />
             </Field>
 
@@ -140,8 +164,8 @@ export default function RegisterPage() {
 
           <div className="mt-5 grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs leading-5 text-zinc-600">
             <p>Members do not self-register; HR/Admin creates member profiles for kiosk attendance.</p>
-            <p>Additional admin invite or approval is a future phase, not part of this form today.</p>
-            <p>Organization name and owner name are currently UI-only and are not sent to Supabase.</p>
+            <p>Additional administrators can be invited by the owner after sign-in.</p>
+            <p>Organization and attendance data are isolated from other workspaces.</p>
           </div>
 
           <p className="mt-5 text-center text-sm text-zinc-500">

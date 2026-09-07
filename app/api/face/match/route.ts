@@ -7,6 +7,7 @@ const DEFAULT_MATCH_THRESHOLD = 0.55
 type MatchRequestBody = {
   descriptor?: unknown
   threshold?: unknown
+  organization?: unknown
 }
 
 type MatchRpcRow = {
@@ -58,11 +59,14 @@ export async function POST(request: Request) {
   }
 
   const threshold = parseThreshold(body.threshold)
+  const organization = typeof body.organization === 'string' ? body.organization.trim() : ''
+  if (!organization) return NextResponse.json({ error: 'organization is required' }, { status: 400 })
   const supabase = await createClient()
 
-  const { data: matchRows, error: matchError } = await supabase.rpc('secure_match_member_by_face', {
+  const { data: matchRows, error: matchError } = await supabase.rpc('secure_match_member_by_face_scoped', {
     query_embedding: descriptor,
     match_threshold: threshold,
+    organization_slug: organization,
   })
 
   if (matchError) {

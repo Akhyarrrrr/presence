@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { BadgeCheck, Building2, IdCard, Mail, Search, ShieldCheck, UserMinus, UserPlus, Users } from 'lucide-react'
+import { BadgeCheck, Building2, FileUp, IdCard, Mail, Search, ShieldCheck, UserMinus, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Member } from '@/types'
@@ -14,6 +14,7 @@ export default function MembersClient({
 }: Readonly<{ initialMembers: Member[]; organizationId: string }>) {
   const [members, setMembers] = useState(initialMembers)
   const [search, setSearch] = useState('')
+  const [importing, setImporting] = useState(false)
 
   const filtered = members.filter(
     (member) =>
@@ -42,6 +43,38 @@ export default function MembersClient({
 
     setMembers((prev) => prev.filter((member) => member.id !== id))
     toast.success(`${name} deactivated`)
+  }
+
+  async function importCsv(file: File) {
+    setImporting(true)
+    // ponytail: intentionally supports plain comma-separated values; use a CSV library if quoted commas become a real roster need.
+    const lines = (await file.text()).split(/\r?\n/).filter(Boolean)
+    const headers = lines.shift()?.split(',').map((value) => value.trim().toLowerCase()) || []
+    const nameIndex = headers.indexOf('name')
+    const idIndex = headers.indexOf('employee_id')
+    const emailIndex = headers.indexOf('email')
+    if (nameIndex < 0 || idIndex < 0) {
+      toast.error('CSV must contain name and employee_id headers')
+      setImporting(false)
+      return
+    }
+    const rows = lines.map((line) => line.split(',').map((value) => value.trim())).filter((values) => values[nameIndex] && values[idIndex]).map((values) => ({
+      organization_id: organizationId,
+      name: values[nameIndex],
+      employee_id: values[idIndex],
+      email: emailIndex >= 0 ? values[emailIndex] || null : null,
+      face_descriptor: null,
+    }))
+    if (!rows.length) {
+      toast.error('CSV has no valid member rows')
+      setImporting(false)
+      return
+    }
+    const { data, error } = await createClient().from('members').insert(rows).select('*, departments(name)')
+    setImporting(false)
+    if (error) return void toast.error(error.message)
+    setMembers((current) => [...(data as Member[]), ...current])
+    toast.success(`${data.length} members imported`)
   }
 
   return (
@@ -77,6 +110,14 @@ export default function MembersClient({
           />
         </div>
       </FilterBar>
+
+      <Surface className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row sm:items-center">
+        <div><p className="font-semibold text-zinc-950">Bulk roster import</p><p className="text-sm text-zinc-600">CSV headers: name, employee_id, email. Imported members enroll face or badge later.</p></div>
+        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-700">
+          <FileUp size={16} /> {importing ? 'Importing…' : 'Import CSV'}
+          <input type="file" accept=".csv,text/csv" disabled={importing} className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file) }} />
+        </label>
+      </Surface>
 
       <Surface className="p-4">
         <div className="reveal-stagger grid gap-2 text-sm leading-6 text-zinc-600 sm:grid-cols-3">
@@ -141,9 +182,9 @@ export default function MembersClient({
                   </button>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-3">
-                  <StatusBadge tone="emerald">
+                  <StatusBadge tone={member.face_descriptor ? 'emerald' : 'amber'}>
                     <BadgeCheck size={12} />
-                    Face registered
+                    {member.face_descriptor ? 'Face registered' : 'Enrollment pending'}
                   </StatusBadge>
                   <StatusBadge tone={member.is_active ? 'cyan' : 'zinc'}>
                     {member.is_active ? 'Active' : 'Inactive'}
@@ -203,9 +244,9 @@ export default function MembersClient({
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <StatusBadge tone="emerald">
+                        <StatusBadge tone={member.face_descriptor ? 'emerald' : 'amber'}>
                           <ShieldCheck size={12} />
-                          Face registered
+                          {member.face_descriptor ? 'Face registered' : 'Enrollment pending'}
                         </StatusBadge>
                       </td>
                       <td className="px-5 py-4">

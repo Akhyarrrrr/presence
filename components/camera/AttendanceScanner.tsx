@@ -59,12 +59,12 @@ const attendanceStatusLabel: Record<AttendanceStatus, string> = {
   no_shift: 'No Shift',
 }
 
-async function matchFaceOnServer(descriptor: Float32Array) {
+async function matchFaceOnServer(descriptor: Float32Array, organization: string) {
   try {
     const response = await fetch('/api/face/match', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ descriptor: Array.from(descriptor) }),
+      body: JSON.stringify({ descriptor: Array.from(descriptor), organization }),
     })
 
     if (!response.ok) return null
@@ -85,7 +85,7 @@ async function matchFaceOnServer(descriptor: Float32Array) {
   }
 }
 
-export default function AttendanceScanner() {
+export default function AttendanceScanner({ organizationSlug }: { organizationSlug: string }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animFrameRef = useRef<number | null>(null)
@@ -113,7 +113,7 @@ export default function AttendanceScanner() {
   } | null>(null)
 
   const loadBootstrap = useCallback(async () => {
-    const response = await fetch('/api/attendance/bootstrap', {
+    const response = await fetch(`/api/attendance/bootstrap?organization=${encodeURIComponent(organizationSlug)}`, {
       method: 'GET',
       cache: 'no-store',
     })
@@ -129,7 +129,7 @@ export default function AttendanceScanner() {
       todayLogsRef.current = logs
       setTodayLogs(logs)
     }
-  }, [])
+  }, [organizationSlug])
 
   useEffect(() => {
     loadBootstrap()
@@ -169,6 +169,7 @@ export default function AttendanceScanner() {
             confidence,
             distance,
             liveness_verified: true,
+            organization: organizationSlug,
           }),
         })
 
@@ -236,7 +237,7 @@ export default function AttendanceScanner() {
 
       await loadBootstrap()
     },
-    [loadBootstrap, members]
+    [loadBootstrap, members, organizationSlug]
   )
 
   const runDetectionLoop = useCallback(function loop() {
@@ -292,7 +293,7 @@ export default function AttendanceScanner() {
 
           const matches = await Promise.all(
             detections.map(async (detection) => {
-              const serverMatch = await matchFaceOnServer(detection.descriptor)
+              const serverMatch = await matchFaceOnServer(detection.descriptor, organizationSlug)
               return {
                 detection: detection.detection,
                 label: serverMatch ? serverMatch.memberName : 'Unknown',
@@ -328,7 +329,7 @@ export default function AttendanceScanner() {
 
       loop()
     })
-  }, [recordAttendance])
+  }, [organizationSlug, recordAttendance])
 
   async function startScanning() {
     setStatus('loading')

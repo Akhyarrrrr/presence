@@ -41,6 +41,7 @@ export default function SchedulesClient({
   const [shiftId, setShiftId] = useState('')
   const [saving, setSaving] = useState(false)
   const [validation, setValidation] = useState<string | null>(null)
+  const [repeatUntil, setRepeatUntil] = useState('')
 
   const assignedMemberIds = useMemo(
     () => new Set(assignments.map((assignment) => assignment.member_id)),
@@ -84,12 +85,29 @@ export default function SchedulesClient({
           .eq('organization_id', organizationId)
       : await supabase.from('shift_assignments').insert(payload)
 
-    setSaving(false)
-
     if (error) {
+      setSaving(false)
       toast.error(error.message)
       return
     }
+
+    if (repeatUntil && repeatUntil > selectedDate) {
+      const dates: string[] = []
+      const cursor = new Date(`${selectedDate}T12:00:00Z`)
+      const end = new Date(`${repeatUntil}T12:00:00Z`)
+      while (cursor <= end && dates.length < 52) {
+        cursor.setUTCDate(cursor.getUTCDate() + 7)
+        if (cursor <= end) dates.push(cursor.toISOString().slice(0, 10))
+      }
+      if (dates.length) {
+        const { error: recurringError } = await supabase.from('shift_assignments').upsert(
+          dates.map((workDate) => ({ organization_id: organizationId, member_id: memberId, shift_id: shiftId, work_date: workDate })),
+          { onConflict: 'member_id,work_date' }
+        )
+        if (recurringError) { setSaving(false); toast.error(recurringError.message); return }
+      }
+    }
+    setSaving(false)
 
     toast.success(existing ? 'Assignment updated' : 'Shift assigned')
     setMemberId('')
@@ -144,6 +162,10 @@ export default function SchedulesClient({
                 </option>
               ))}
             </SelectField>
+
+            <Field id="schedule-repeat-until" label="Repeat weekly until" hint="Optional, maximum 52 weeks.">
+              <TextInput id="schedule-repeat-until" type="date" min={selectedDate} value={repeatUntil} onChange={(e) => setRepeatUntil(e.target.value)} />
+            </Field>
           </div>
         </Surface>
 
